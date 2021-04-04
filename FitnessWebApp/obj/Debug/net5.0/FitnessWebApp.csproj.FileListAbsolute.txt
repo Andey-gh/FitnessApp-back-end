@@ -68,11 +68,6 @@ G:\VisualProjects\FitnessWebApp\FitnessWebApp\obj\Debug\net5.0\ref\FitnessWebApp
 G:\VisualProjects\FitnessWebApp\FitnessWebApp\obj\Debug\net5.0\FitnessWebApp.pdb
 G:\VisualProjects\FitnessWebApp\FitnessWebApp\obj\Debug\net5.0\FitnessWebApp.genruntimeconfig.cache
 G:\VisualProjects\FitnessWebApp\FitnessWebApp\obj\Debug\net5.0\FitnessWebApp.csprojAssemblyReference.cache
-G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\Microsoft.AspNetCore.Cryptography.Internal.dll
-G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\Microsoft.AspNetCore.Cryptography.KeyDerivation.dll
-G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\Microsoft.Extensions.DependencyInjection.dll
-G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\Microsoft.Extensions.Identity.Core.dll
-G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\Microsoft.Extensions.Identity.Stores.dll
-G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\System.Diagnostics.DiagnosticSource.dll
 G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\Microsoft.Graph.dll
 G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\Microsoft.Graph.Core.dll
+G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\libman.json

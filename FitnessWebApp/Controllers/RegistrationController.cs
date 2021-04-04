@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 using FitnessWebApp.Models;
 namespace FitnessWebApp.Controllers
 {
-    
+    [Route("/api")]
+    [ApiController]
     public class RegistrationController:Controller
     {
         private readonly UserManager<User> userManager;
@@ -32,7 +33,7 @@ namespace FitnessWebApp.Controllers
                 {
                     // установка куки
                      await signInManager.SignInAsync(user, false);
-                    return  Ok(4);
+                    return  Ok(user);
                    // return Ok(1);
                 }
                 else

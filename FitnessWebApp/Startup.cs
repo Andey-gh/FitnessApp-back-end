@@ -74,6 +74,7 @@ namespace FitnessWebApp
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+               // endpoints.MapControllerRoute("default", "{controller=TrainingPlan}/{action=GetPlans}");
             });
         }
     }

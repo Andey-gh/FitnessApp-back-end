@@ -8,7 +8,10 @@ using System.Threading.Tasks;
 using FitnessWebApp.Models;
 
 namespace FitnessWebApp.Controllers
-{   [Authorize]
+{
+    [Route("/api")]
+    [Authorize]
+    [ApiController]
     public class AccountController:Controller
     {
         
