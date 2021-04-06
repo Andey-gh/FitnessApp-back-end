@@ -71,3 +71,6 @@ G:\VisualProjects\FitnessWebApp\FitnessWebApp\obj\Debug\net5.0\FitnessWebApp.csp
 G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\Microsoft.Graph.dll
 G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\Microsoft.Graph.Core.dll
 G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\libman.json
+G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\MySqlConnector.dll
+G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\Pomelo.EntityFrameworkCore.MySql.dll
+G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\Pomelo.JsonObject.dll

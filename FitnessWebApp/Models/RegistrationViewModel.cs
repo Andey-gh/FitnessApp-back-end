@@ -22,7 +22,7 @@ namespace FitnessWebApp.Models
         public string Name { get; set; }
         [Required]
         [Display(Name = "Возраст")]
-        public string Age { get; set; }
+        public int Age { get; set; }
         [Required]
         [Display(Name = "Вес")]
         public int Weight { get; set; }

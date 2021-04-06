@@ -15,6 +15,8 @@ namespace FitnessWebApp.Domain
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
         public DbSet<TrainingPlan> TrainingPlans { get; set; }
+        public DbSet<TrainingHistory> TrainingHistories { get; set; }
+        public DbSet<Excercise> Excercises { get; set; }
     }
     
 }

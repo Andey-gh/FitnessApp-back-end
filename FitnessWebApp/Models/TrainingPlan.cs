@@ -17,6 +17,7 @@ namespace FitnessWebApp.Models
         public string Discription { get; set; }
         [Required]
         [Display(Name = "Название")]
+        [MaxLength(50)]
         public string Name { get; set; }
 
         [Required]
