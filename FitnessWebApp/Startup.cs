@@ -31,12 +31,13 @@ namespace FitnessWebApp
             //настраиваем identity систему
             services.AddIdentity<User, IdentityRole>(opts =>
             {
-                opts.User.RequireUniqueEmail = false;
-                opts.Password.RequiredLength = 2;
+                opts.User.RequireUniqueEmail = true;
+                opts.SignIn.RequireConfirmedEmail = true;
+                opts.Password.RequiredLength = 6;
                 opts.Password.RequireNonAlphanumeric = false;
-                opts.Password.RequireLowercase = false;
-                opts.Password.RequireUppercase = false;
-                opts.Password.RequireDigit = false;
+                opts.Password.RequireLowercase = true;
+                opts.Password.RequireUppercase = true;
+                opts.Password.RequireDigit = true;
             }).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
             services.ConfigureApplicationCookie(options =>
             {

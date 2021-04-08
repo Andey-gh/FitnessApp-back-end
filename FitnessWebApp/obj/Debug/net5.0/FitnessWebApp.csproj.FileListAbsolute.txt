@@ -74,3 +74,6 @@ G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\libman.json
 G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\MySqlConnector.dll
 G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\Pomelo.EntityFrameworkCore.MySql.dll
 G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\Pomelo.JsonObject.dll
+G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\MailKit.dll
+G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\MimeKit.dll
+G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\BouncyCastle.Crypto.dll

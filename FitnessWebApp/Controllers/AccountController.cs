@@ -56,7 +56,8 @@ namespace FitnessWebApp.Controllers
         public async Task<IActionResult> Logout()
         {
             await signInManager.SignOutAsync();
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("api", "reg");
         }
+       
     }
 }

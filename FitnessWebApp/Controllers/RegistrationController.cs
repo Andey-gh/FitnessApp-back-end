@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FitnessWebApp.Models;
+using FitnessWebApp.Services;
+
 namespace FitnessWebApp.Controllers
 {
     [Route("/api")]
@@ -32,9 +34,17 @@ namespace FitnessWebApp.Controllers
                 if (result.Succeeded)
                 {
                     // установка куки
-                     await signInManager.SignInAsync(user, false);
-                    return  Ok(user);
-                   // return Ok(1);
+                    var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                    var callbackUrl = Url.Action(
+                        "ConfirmEmail",
+                        "api",
+                        new { userId = user.Id, code = code },
+                        protocol: HttpContext.Request.Scheme);
+                    EmailService emailService = new EmailService();
+                    await emailService.SendEmailAsync(model.Email, "Confirm your account",
+                        $"Подтвердите регистрацию, перейдя по ссылке: <a href='{callbackUrl}'>Confirm E-mail</a>");
+                    return Content("Для завершения регистрации проверьте электронную почту и перейдите по ссылке, указанной в письме");
+
                 }
                 else
                 {
@@ -44,7 +54,29 @@ namespace FitnessWebApp.Controllers
                     }
                 }
             }
-            return Ok(1);
+            return NotFound("Incorrect DATA");
+        }
+        
+        [HttpGet]
+        [Route("ConfirmEmail")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmEmail(string userId, string code)
+        {
+            if (userId == null || code == null)
+            {
+                return NotFound("Error");
+            }
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound("Error");
+            }
+            var result = await userManager.ConfirmEmailAsync(user, code);
+            if (result.Succeeded)
+                return Ok(user);
+            else
+                return NotFound("Error");
         }
     }
+    
 }
