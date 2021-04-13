@@ -8,9 +8,11 @@ using FitnessWebApp.Models;
 using FitnessWebApp.Domain;
 //using System.Data.Entity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FitnessWebApp.Controllers
 {
+    [Authorize]
     [Route("/api")]
     [ApiController]
     public class TrainingPlanController:Controller

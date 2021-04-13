@@ -77,3 +77,5 @@ G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\Pomelo.JsonObject
 G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\MailKit.dll
 G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\MimeKit.dll
 G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\BouncyCastle.Crypto.dll
+G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\RestSharp.dll
+G:\VisualProjects\FitnessWebApp\FitnessWebApp\bin\Debug\net5.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll

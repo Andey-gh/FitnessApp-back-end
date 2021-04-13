@@ -9,6 +9,10 @@ using Microsoft.Extensions.Hosting;
 using FitnessWebApp.Domain;
 using Microsoft.OpenApi.Models;
 using FitnessWebApp.Models;
+using System;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using FitnessWebApp.Services;
 
 namespace FitnessWebApp
 {
@@ -41,12 +45,40 @@ namespace FitnessWebApp
             }).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
             services.ConfigureApplicationCookie(options =>
             {
-                options.Cookie.Name = "myCompanyAuth";
+                options.Cookie.Name = "fitnessWebApp";
                 options.Cookie.HttpOnly = true;
-                options.LoginPath = "/account/login";
+                options.LoginPath = "/api/login";
                 options.AccessDeniedPath = "/account/accessdenied";
+                options.LogoutPath = "/api/Logout";
                 options.SlidingExpiration = true;
+               // options.Cookie.Expiration= TimeSpan.FromMinutes(20);
+                
+
             });
+           /* services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                   .AddJwtBearer(options =>
+                   {
+                       options.RequireHttpsMetadata = false;
+                       options.TokenValidationParameters = new TokenValidationParameters
+                       {
+                            // укзывает, будет ли валидироваться издатель при валидации токена
+                            ValidateIssuer = true,
+                            // строка, представляющая издателя
+                            ValidIssuer = AuthOptions.ISSUER,
+
+                            // будет ли валидироваться потребитель токена
+                            ValidateAudience = true,
+                            // установка потребителя токена
+                            ValidAudience = AuthOptions.AUDIENCE,
+                            // будет ли валидироваться время существования
+                            ValidateLifetime = true,
+
+                            // установка ключа безопасности
+                            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
+                            // валидация ключа безопасности
+                            ValidateIssuerSigningKey = true,
+                       };
+                   });*/
             services.AddControllersWithViews();
            /* services.AddSwaggerGen(c =>
             {

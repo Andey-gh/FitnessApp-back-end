@@ -9,9 +9,10 @@ using FitnessWebApp.Models;
 using FitnessWebApp.Services;
 
 namespace FitnessWebApp.Controllers
-{
+{   
     [Route("/api")]
     [ApiController]
+    
     public class RegistrationController:Controller
     {
         private readonly UserManager<User> userManager;
@@ -34,11 +35,12 @@ namespace FitnessWebApp.Controllers
                 if (result.Succeeded)
                 {
                     // установка куки
-                    var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                    var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                    
                     var callbackUrl = Url.Action(
                         "ConfirmEmail",
                         "api",
-                        new { userId = user.Id, code = code },
+                        new { userId = user.Id, code = token },
                         protocol: HttpContext.Request.Scheme);
                     EmailService emailService = new EmailService();
                     await emailService.SendEmailAsync(model.Email, "Confirm your account",
@@ -59,7 +61,7 @@ namespace FitnessWebApp.Controllers
         
         [HttpGet]
         [Route("ConfirmEmail")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<IActionResult> ConfirmEmail(string userId, string code)
         {
             if (userId == null || code == null)
