@@ -30,7 +30,7 @@ namespace FitnessWebApp
         {
             //services.AddDbContext<AppDbContext>(options =>
             // options.UseSqlServer("Server=DESKTOP-FHIPLI2;Database=fitnessapplication;Trusted_Connection=True;MultipleActiveResultSets=true;"));
-            services.AddDbContext<AppDbContext>(options => options.UseMySql("server=20.52.143.162;user=vasakot;password=Svetlana2001_;database=fitnessapp;port=3306;Connect Timeout=20;"));
+            services.AddDbContext<AppDbContext>(options => options.UseMySql("server=20.52.143.162;user=vasakot;password=Svetlana2001_;database=fitnesswebapp;port=3306;Connect Timeout=20;"));
             // services.AddDbContext<AppDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("Default")));
             //настраиваем identity систему
             services.AddIdentity<User, IdentityRole>(opts =>

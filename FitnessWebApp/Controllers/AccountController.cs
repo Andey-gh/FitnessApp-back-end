@@ -46,7 +46,7 @@ namespace FitnessWebApp.Controllers
             //var userId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "UserName").Value.ToString();
             var user = await userManager.FindByIdAsync(id);
          
-            return Ok(user);
+            return Json(user);
         }
 
 
@@ -65,16 +65,17 @@ namespace FitnessWebApp.Controllers
                     Microsoft.AspNetCore.Identity.SignInResult result = await signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, true);
                     if (result.Succeeded)
                     {
+                        UserViewModel user_model = new UserViewModel(user.Id,user.Age,user.Name,user.Weight,user.Height,user.Gender,user.Email);
                         //await Authenticate(model.UserLogin);
-                         return Ok(user);
+                         return Json(user_model);
                         //return Redirect($"profile/{user.Id}");
                         //return Ok(User.Identity.Name);
                     }
                 }
-                return NotFound("Incorrect DATA");
+                return Unauthorized();
                 //ModelState.AddModelError(nameof(LoginViewModel.UserName), "Неверный логин или пароль");
             }
-            return NotFound("Incorrect MODEL");
+            return UnprocessableEntity();
         }
        
 
@@ -83,7 +84,7 @@ namespace FitnessWebApp.Controllers
         public async Task<IActionResult> Logout()
         {
             await signInManager.SignOutAsync();
-            return RedirectToAction("api", "reg");
+            return RedirectToAction("api", "login");
         }
        /* private async Task Authenticate(string userName)
         {

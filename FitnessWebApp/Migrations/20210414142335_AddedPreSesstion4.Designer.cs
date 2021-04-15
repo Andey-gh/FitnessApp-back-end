@@ -3,14 +3,16 @@ using System;
 using FitnessWebApp.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FitnessWebApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210414142335_AddedPreSesstion4")]
+    partial class AddedPreSesstion4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,21 +54,13 @@ namespace FitnessWebApp.Migrations
                         .IsRequired()
                         .HasColumnType("int");
 
-                    b.Property<int>("MuscleGroupId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("PlanId")
                         .IsRequired()
-                        .HasColumnType("int");
-
-                    b.Property<int>("SetsNumber")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ExcerciseId");
-
-                    b.HasIndex("MuscleGroupId");
 
                     b.HasIndex("PlanId");
 
@@ -163,6 +157,10 @@ namespace FitnessWebApp.Migrations
                         .IsRequired()
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
+                    b.Property<int?>("MuscleGroupId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -178,6 +176,8 @@ namespace FitnessWebApp.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MuscleGroupId");
 
                     b.ToTable("TrainingPlans");
                 });
@@ -399,12 +399,6 @@ namespace FitnessWebApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FitnessWebApp.Models.MuscleGroup", "MuscleGroup")
-                        .WithMany()
-                        .HasForeignKey("MuscleGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("FitnessWebApp.Models.TrainingPlan", "TrainingPlan")
                         .WithMany()
                         .HasForeignKey("PlanId")
@@ -412,8 +406,6 @@ namespace FitnessWebApp.Migrations
                         .IsRequired();
 
                     b.Navigation("Excercise");
-
-                    b.Navigation("MuscleGroup");
 
                     b.Navigation("TrainingPlan");
                 });
@@ -462,6 +454,17 @@ namespace FitnessWebApp.Migrations
                     b.Navigation("TrainingPlan");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FitnessWebApp.Models.TrainingPlan", b =>
+                {
+                    b.HasOne("FitnessWebApp.Models.MuscleGroup", "MuscleGroup")
+                        .WithMany()
+                        .HasForeignKey("MuscleGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MuscleGroup");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

@@ -12,10 +12,10 @@ namespace FitnessWebApp.Models
         [Key]
         public int Id { get; set; }
 
-        [Required]
+       
         [Display(Name = "Время начала")]
         public DataType StartTime { get; set; }
-        [Required]
+        
         [Display(Name = "Время окончания")]
         public DataType EndTime { get; set; }
 
@@ -33,5 +33,10 @@ namespace FitnessWebApp.Models
         public int PlanId { get; set; }
         [ForeignKey(nameof(PlanId))]
         public TrainingPlan TrainingPlan { get; set; }
+        [Required]
+        [Display(Name = "Id Упражнения")]
+        public int ExcerciseId { get; set; }
+        [ForeignKey(nameof(ExcerciseId))]
+        public Excercise Excercise { get; set; }
     }
 }

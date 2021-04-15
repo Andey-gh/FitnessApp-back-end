@@ -33,15 +33,12 @@ namespace FitnessWebApp.Controllers
             if (ModelState.IsValid) {
                 await _context.AddAsync(plan);
             await _context.SaveChangesAsync();
-
-
-            return Ok(plan); 
+            return Json(plan); 
             }
-            return NotFound(1);
-                
-
-
+            return UnprocessableEntity();
+               
         }
+
         [HttpGet]
         [Route("TrainingPlans")]
         public async Task<ActionResult<ICollection<TrainingPlan>>> GetPlans()
@@ -54,18 +51,18 @@ namespace FitnessWebApp.Controllers
         public async Task<ActionResult<TrainingPlan>> GetPlan(int id)
         {
             if (ModelState.IsValid) 
-            {var plan_id = await _context.TrainingPlans.FindAsync(id);
-
-
+            {
+                var plan_id = await _context.TrainingPlans.FindAsync(id);
 
             if (plan_id == null)
             {
                 return NotFound();
             }
 
-            return Ok(plan_id); 
+            return Json(plan_id); 
+
             }
-            return NotFound(1);
+            return UnprocessableEntity();
                 
         }
 
@@ -84,7 +81,7 @@ namespace FitnessWebApp.Controllers
 
             return Ok("Plan was deleted"); 
             }
-            return NotFound(1);
+            return UnprocessableEntity();
                
         }
     }

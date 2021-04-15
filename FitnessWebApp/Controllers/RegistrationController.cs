@@ -9,11 +9,11 @@ using FitnessWebApp.Models;
 using FitnessWebApp.Services;
 
 namespace FitnessWebApp.Controllers
-{   
+{
     [Route("/api")]
     [ApiController]
-    
-    public class RegistrationController:Controller
+
+    public class RegistrationController : Controller
     {
         private readonly UserManager<User> userManager;
         private readonly SignInManager<User> signInManager;
@@ -22,21 +22,21 @@ namespace FitnessWebApp.Controllers
             userManager = userMgr;
             signInManager = signinMgr;
         }
-        
+
         [Route("reg")]
         [HttpPost]
         public async Task<IActionResult> Register(RegistrationViewModel model)
         {
             if (ModelState.IsValid)
             {
-                User user = new User { UserName = model.UserLogin, Age = model.Age,Name=model.Name,Weight=model.Weight,Gender=model.Gender,Height=model.Height,Email=model.Email };
+                User user = new User { UserName = model.UserLogin, Age = model.Age, Name = model.Name, Weight = model.Weight, Gender = model.Gender, Height = model.Height, Email = model.Email };
                 // добавляем пользователя
                 var result = await userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
                     // установка куки
                     var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-                    
+
                     var callbackUrl = Url.Action(
                         "ConfirmEmail",
                         "api",
@@ -56,12 +56,12 @@ namespace FitnessWebApp.Controllers
                     }
                 }
             }
-            return NotFound("Incorrect DATA");
+            return UnprocessableEntity();
         }
-        
+
         [HttpGet]
         [Route("ConfirmEmail")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmail(string userId, string code)
         {
             if (userId == null || code == null)
@@ -75,7 +75,10 @@ namespace FitnessWebApp.Controllers
             }
             var result = await userManager.ConfirmEmailAsync(user, code);
             if (result.Succeeded)
-                return Ok(user);
+            {
+                UserViewModel user_model = new UserViewModel(user.Id, user.Age, user.Name, user.Weight, user.Height, user.Gender, user.Email);
+                return Json(user_model);
+            }
             else
                 return NotFound("Error");
         }
