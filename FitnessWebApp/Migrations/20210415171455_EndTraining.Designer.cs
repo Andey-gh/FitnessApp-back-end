@@ -3,14 +3,16 @@ using System;
 using FitnessWebApp.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FitnessWebApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210415171455_EndTraining")]
+    partial class EndTraining
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -120,13 +122,10 @@ namespace FitnessWebApp.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("ExcerciseId")
+                    b.Property<int>("EndTime")
                         .HasColumnType("int");
 
-                    b.Property<int>("MuscleGroupId")
+                    b.Property<int>("ExcerciseId")
                         .HasColumnType("int");
 
                     b.Property<int>("PlanId")
@@ -135,8 +134,8 @@ namespace FitnessWebApp.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime(6)");
+                    b.Property<int>("StartTime")
+                        .HasColumnType("int");
 
                     b.Property<float>("TotalWeight")
                         .HasColumnType("float");
@@ -148,8 +147,6 @@ namespace FitnessWebApp.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ExcerciseId");
-
-                    b.HasIndex("MuscleGroupId");
 
                     b.HasIndex("PlanId");
 
@@ -453,12 +450,6 @@ namespace FitnessWebApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FitnessWebApp.Models.MuscleGroup", "muscleGroup")
-                        .WithMany()
-                        .HasForeignKey("MuscleGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("FitnessWebApp.Models.TrainingPlan", "TrainingPlan")
                         .WithMany()
                         .HasForeignKey("PlanId")
@@ -472,8 +463,6 @@ namespace FitnessWebApp.Migrations
                         .IsRequired();
 
                     b.Navigation("Excercise");
-
-                    b.Navigation("muscleGroup");
 
                     b.Navigation("TrainingPlan");
 

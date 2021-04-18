@@ -9,19 +9,22 @@ namespace FitnessWebApp.Models
 {
     public class TrainingHistory
     {
+        
         [Key]
         public int Id { get; set; }
 
        
         [Display(Name = "Время начала")]
-        public DataType StartTime { get; set; }
+        public DateTime StartTime { get; set; }
         
         [Display(Name = "Время окончания")]
-        public DataType EndTime { get; set; }
+        public DateTime EndTime { get; set; }
 
         [Required]
         [Display(Name = "Общий вес")]
         public float TotalWeight { get; set; }
+
+        public int Quantity { get; set; }
         [Required]
         [Display(Name = "Id пользователя")]
         public string UserId { get; set; }
@@ -38,5 +41,24 @@ namespace FitnessWebApp.Models
         public int ExcerciseId { get; set; }
         [ForeignKey(nameof(ExcerciseId))]
         public Excercise Excercise { get; set; }
+        public int MuscleGroupId { get; set; }
+        [ForeignKey(nameof(MuscleGroupId))]
+        public MuscleGroup muscleGroup { get; set; }
+        public TrainingHistory( int PlanId, int ExcerciseId, float Kg, int Quantity,DateTime StartTime,DateTime EndTime ,string UserId,int muscleGroupId )
+        {
+            this.TotalWeight = Kg;
+            this.PlanId = PlanId;
+            this.ExcerciseId = ExcerciseId;
+            this.Quantity = Quantity;
+            this.UserId = UserId;
+            this.StartTime = StartTime;
+            this.EndTime = EndTime;
+            this.MuscleGroupId = muscleGroupId;
+            
+        }
+        public TrainingHistory()
+        {
+
+        }
     }
 }
