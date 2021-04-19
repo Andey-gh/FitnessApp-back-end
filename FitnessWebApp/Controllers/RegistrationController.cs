@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FitnessWebApp.Models;
 using FitnessWebApp.Services;
+using FitnessWebApp.Domain;
 
 namespace FitnessWebApp.Controllers
 {
@@ -17,10 +18,13 @@ namespace FitnessWebApp.Controllers
     {
         private readonly UserManager<User> userManager;
         private readonly SignInManager<User> signInManager;
-        public RegistrationController(UserManager<User> userMgr, SignInManager<User> signinMgr)
+        private AppDbContext _context;
+
+        public RegistrationController(UserManager<User> userMgr, SignInManager<User> signinMgr, AppDbContext Context)
         {
             userManager = userMgr;
             signInManager = signinMgr;
+            _context = Context;
         }
 
         [Route("reg")]
@@ -77,11 +81,19 @@ namespace FitnessWebApp.Controllers
             if (result.Succeeded)
             {
                 UserViewModel user_model = new UserViewModel(user.Id, user.Age, user.Name, user.Weight, user.Height, user.Gender, user.Email);
-                return Json(user_model);
+                PlansOfUser plansOfUser = new PlansOfUser();
+                plansOfUser.PlanId = 1;
+                plansOfUser.UserId = user_model.Id;
+                await _context.PlansOfUsers.AddAsync(plansOfUser);
+                await _context.SaveChangesAsync();
+                await signInManager.SignOutAsync();
+                return Redirect("/login");
+                //return Json(user_model);
             }
             else
                 return NotFound("Error");
         }
+        
     }
     
 }

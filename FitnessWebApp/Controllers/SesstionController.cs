@@ -106,6 +106,26 @@ namespace FitnessWebApp.Controllers
 
 
         }
+        [HttpGet("TrainingHistory")]
+
+        public async Task<ActionResult<ICollection<TrainingHistory>>> GetUserTrainingHistory()
+        {
+            
+            var user = await userManager.FindByNameAsync(User.Identity.Name);
+            var trainingHistory = await _context.TrainingHistories.Include(c=>c.Excercise).Include(x=>x.muscleGroup).Where(p => p.UserId == user.Id ).Select(x=>new {x.Excercise,x.EndTime,x.Quantity,x.muscleGroup,x.TotalWeight }).ToListAsync();
+
+
+            if (trainingHistory != null)
+            {
+
+                    return Json(trainingHistory);
+                
+            }
+
+            return NoContent();
+
+
+        }
 
 
     }
