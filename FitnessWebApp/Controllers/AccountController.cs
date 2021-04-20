@@ -83,8 +83,10 @@ namespace FitnessWebApp.Controllers
         [Route("Logout")]
         public async Task<IActionResult> Logout()
         {
-            await signInManager.SignOutAsync();
+            await signInManager.SignOutAsync(); 
+       
             return RedirectToAction("api", "login");
+           
         }
        /* private async Task Authenticate(string userName)
         {

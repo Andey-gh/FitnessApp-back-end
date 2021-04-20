@@ -49,13 +49,15 @@ namespace FitnessWebApp
             services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.Name = "fitnessWebApp";
-                options.Cookie.HttpOnly = true;
+                options.Cookie.HttpOnly = false;
                 options.LoginPath = "/api/login";
                 options.AccessDeniedPath = "/account/accessdenied";
                 options.LogoutPath = "/api/Logout";
                 options.SlidingExpiration = true;
-               // options.Cookie.Expiration= TimeSpan.FromMinutes(20);
+                options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
                 
+               // options.Cookie.Expiration= TimeSpan.FromMinutes(20);
+
 
             });
            /* services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
