@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace FitnessWebApp.Controllers
 {
-    [Authorize]
+    
     [Route("/api")]
     [ApiController]
     public class SesstionController:Controller
@@ -28,12 +28,17 @@ namespace FitnessWebApp.Controllers
             userManager = userMgr;
         }
 
-        [HttpGet("getPlan/{id}/{day}")]
+        [HttpGet("getPlan/{id}/{day}/{UserId}")]
         
-        public async Task<ActionResult<ICollection<ExcerciseInPlan>>> GetPreSsestion(int Id,int Day)
+        public async Task<ActionResult<ICollection<ExcerciseInPlan>>> GetPreSsestion(int Id,int Day,string UserId)
         {
             var plan = await _context.TrainingPlans.FindAsync(Id);
-            var user = await userManager.FindByNameAsync(User.Identity.Name);
+            var user = await userManager.FindByIdAsync(UserId);
+           
+            {
+                if (user == null)
+                    return Unauthorized();
+            }
             var userplan = await _context.PlansOfUsers.Where(p => p.UserId == user.Id&&p.PlanId==Id).ToListAsync();
             
             
@@ -54,15 +59,20 @@ namespace FitnessWebApp.Controllers
             
         }
 
-        [HttpGet("getPreviousTraining/{id}")]
+        [HttpGet("getPreviousTraining/{id}/{UserId}")]
 
-        public async Task<ActionResult<PreviousTrainViewModel>> GetPreviousTrainHistory(int Id)
+        public async Task<ActionResult<PreviousTrainViewModel>> GetPreviousTrainHistory(int Id,string UserId)
         {
             var plan = await _context.TrainingPlans.FindAsync(Id);
             List<ExcerciseInPlan> exsercise=new List<ExcerciseInPlan>();
             List<TrainingHistory> trainingHistories = new List<TrainingHistory>();
             //List<MuscleGroup> muscleGroups = new List<MuscleGroup>();
-            var user = await userManager.FindByNameAsync(User.Identity.Name);
+            var user = await userManager.FindByIdAsync(UserId);
+           
+            {
+                if (user == null)
+                    return Unauthorized();
+            }
             var user_plans = await _context.PlansOfUsers.Where(x => x.UserId == user.Id).ToListAsync();
             var trHis = await _context.TrainingHistories.OrderBy(x => x.UserId == user.Id && x.PlanId == Id).OrderBy(p=>p.EndTime).LastAsync();
             for(int i=0;i<user_plans.Count;i++)
@@ -106,12 +116,17 @@ namespace FitnessWebApp.Controllers
 
 
         }
-        [HttpGet("TrainingHistory")]
+        [HttpGet("TrainingHistory/{UserId}")]
 
-        public async Task<ActionResult<ICollection<TrainingHistory>>> GetUserTrainingHistory()
+        public async Task<ActionResult<ICollection<TrainingHistory>>> GetUserTrainingHistory(string UserId)
         {
             
-            var user = await userManager.FindByNameAsync(User.Identity.Name);
+            var user = await userManager.FindByIdAsync(UserId);
+            
+            {
+                if (user == null)
+                    return Unauthorized();
+            }
             var trainingHistory = await _context.TrainingHistories.Include(c=>c.Excercise).Include(x=>x.muscleGroup).Where(p => p.UserId == user.Id ).Select(x=>new {x.Excercise,x.EndTime,x.Quantity,x.muscleGroup,x.TotalWeight }).ToListAsync();
 
 

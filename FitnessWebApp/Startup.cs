@@ -13,6 +13,8 @@ using System;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using FitnessWebApp.Services;
+using System.Linq;
+using Microsoft.AspNetCore.Http;
 
 namespace FitnessWebApp
 {
@@ -30,7 +32,9 @@ namespace FitnessWebApp
             // This method gets called by the runtime. Use this method to add services to the container.
             public void ConfigureServices(IServiceCollection services)
         {
-           
+            services.AddDistributedMemoryCache();
+            services.AddSession();
+
             //services.AddDbContext<AppDbContext>(options =>
             // options.UseSqlServer("Server=DESKTOP-FHIPLI2;Database=fitnessapplication;Trusted_Connection=True;MultipleActiveResultSets=true;"));
             services.AddDbContext<AppDbContext>(options => options.UseMySql("server=20.52.143.162;user=vasakot;password=Svetlana2001_;database=fitnesswebapp;port=3306;Connect Timeout=20;"));
@@ -51,12 +55,16 @@ namespace FitnessWebApp
                 options.Cookie.Name = "fitnessWebApp";
                 options.Cookie.HttpOnly = false;
                 options.LoginPath = "/api/login";
-                options.AccessDeniedPath = "/account/accessdenied";
+                options.AccessDeniedPath = "/";
                 options.LogoutPath = "/api/Logout";
                 options.SlidingExpiration = true;
                 options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
+                options.ExpireTimeSpan= TimeSpan.FromHours(24);
                 
-               // options.Cookie.Expiration= TimeSpan.FromMinutes(20);
+                
+                
+
+                // options.Cookie.Expiration= TimeSpan.FromMinutes(20);
 
 
             });
@@ -100,17 +108,30 @@ namespace FitnessWebApp
                 //app.UseSwagger();
                 //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "FitnessWebApp v1"));
             }
+             app.UseSession();
+         
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseStaticFiles();
 
             app.UseCors(x => x
                .AllowAnyMethod()
                .AllowAnyHeader()
                .SetIsOriginAllowed(origin => true) // allow any origin
                .AllowCredentials()); // allow credentials
-
+             /* app.Run(async (context) =>
+            {
+                if (context.Session.Keys.Contains("name"))
+                    //await context.Response.WriteAsync($"Hello {context.Session.GetString("value")}!");
+                await context.Response.StartAsync();
+                else
+                {
+                    context.Session.SetString("name", "Tom");
+                    await context.Response.;
+                }
+            });*/
             app.UseCookiePolicy();
             app.UseAuthentication();
             

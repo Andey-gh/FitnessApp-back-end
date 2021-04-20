@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace FitnessWebApp.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("/api")]
     [ApiController]
     public class EndTrainingController : Controller
@@ -28,9 +28,9 @@ namespace FitnessWebApp.Controllers
             userManager = userMgr;
         }
 
-        [HttpPost("trainingSubmit")]
+        [HttpPost("trainingSubmit/{id}")]
 
-        public async Task<ActionResult> EndTraining(EndTrainingViewModel trainingSubmit)
+        public async Task<ActionResult> EndTraining(EndTrainingViewModel trainingSubmit,string Id)
         {
             if(ModelState.IsValid)
             {
@@ -38,7 +38,11 @@ namespace FitnessWebApp.Controllers
                 // var listOfObjectsResult = Json.Decode<List<EndTrainingViewModel>>(jsonString);
                // string output = JsonConvert.SerializeObject(jsonString);
                 //List<EndTrainingViewModel> t = JsonConvert.DeserializeObject<List<EndTrainingViewModel>>(jsonString.ToString());
-                var user = await userManager.FindByNameAsync(User.Identity.Name);
+                var user = await userManager.FindByIdAsync(Id);
+                {
+                    if (user == null)
+                        return Unauthorized();
+                }
              for(int i = 0; i < trainingSubmit.exercises.Count; i++) 
                 { 
             TrainingHistory trainingHistory = new TrainingHistory(trainingSubmit.trainingPlanId, trainingSubmit.exercises[i].exerciseId, trainingSubmit.exercises[i].kg, trainingSubmit.exercises[i].quantity, trainingSubmit.exercises[i].startTime, trainingSubmit.exercises[i].endTime, user.Id,trainingSubmit.muscleGroupId);

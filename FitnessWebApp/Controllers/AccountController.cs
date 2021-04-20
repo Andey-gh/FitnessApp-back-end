@@ -14,6 +14,7 @@ using System.IdentityModel.Tokens.Jwt;
 using FitnessWebApp.Services;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 
 namespace FitnessWebApp.Controllers
 {
@@ -26,10 +27,13 @@ namespace FitnessWebApp.Controllers
         
         private readonly UserManager<User> userManager;
         private readonly SignInManager<User> signInManager;
+        
+
         public AccountController(UserManager<User> userMgr, SignInManager<User> signinMgr)
         {
             userManager = userMgr;
             signInManager = signinMgr;
+           // _httpContext = httpContext;
         }
         [AllowAnonymous]
         public IActionResult Login(string returnUrl)
@@ -37,6 +41,7 @@ namespace FitnessWebApp.Controllers
             ViewBag.returnUrl = returnUrl;
             return View(new LoginViewModel());
         }
+
 
         [HttpGet]
         [Route("profile/{id}")]
@@ -48,8 +53,7 @@ namespace FitnessWebApp.Controllers
          
             return Json(user);
         }
-
-
+      
         [HttpPost]
         [Route("login")]
         [AllowAnonymous]
@@ -66,10 +70,10 @@ namespace FitnessWebApp.Controllers
                     if (result.Succeeded)
                     {
                         UserViewModel user_model = new UserViewModel(user.Id,user.Age,user.Name,user.Weight,user.Height,user.Gender,user.Email);
-                        //await Authenticate(model.UserLogin);
-                         return Json(user_model);
-                        //return Redirect($"profile/{user.Id}");
-                        //return Ok(User.Identity.Name);
+                        
+
+                        return Json(user_model);
+                        
                     }
                 }
                 return Unauthorized();
@@ -79,11 +83,12 @@ namespace FitnessWebApp.Controllers
         }
        
 
-        [Authorize]
+        
         [Route("Logout")]
         public async Task<IActionResult> Logout()
         {
-            await signInManager.SignOutAsync(); 
+            await signInManager.SignOutAsync();
+           
        
             return RedirectToAction("api", "login");
            
