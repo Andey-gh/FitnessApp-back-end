@@ -15,6 +15,7 @@ using FitnessWebApp.Services;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
+using FitnessWebApp.Domain;
 
 namespace FitnessWebApp.Controllers
 {
@@ -27,9 +28,9 @@ namespace FitnessWebApp.Controllers
         
         private readonly UserManager<User> userManager;
         private readonly SignInManager<User> signInManager;
-        
+        private AppDbContext _context;
 
-        public AccountController(UserManager<User> userMgr, SignInManager<User> signinMgr)
+        public AccountController(UserManager<User> userMgr, SignInManager<User> signinMgr, AppDbContext context)
         {
             userManager = userMgr;
             signInManager = signinMgr;
@@ -81,9 +82,38 @@ namespace FitnessWebApp.Controllers
             }
             return UnprocessableEntity();
         }
-       
 
-        
+        [HttpPost]
+        [AllowAnonymous] //временно,для теста,убрать
+        [Route("sendMetrics/{id}")]
+        public async Task<IActionResult> PostMetrics(MetricsModel model,string id)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await userManager.FindByIdAsync(id);
+                if (user != null)
+                {
+                    user.Age = model.MetricAge;
+                    user.Height = model.MetricHeight;
+                    user.Weight = model.MetricWeight;
+                    user.Goal = model.MetricGoal;
+                    user.MaxPushUps = model.MetricPushUps;
+                    user.MaxPullUps = model.MetricPullUps;
+
+                    foreach (string health in model.MetricHealth) {
+                        HealthProblem problem = new HealthProblem { Problem = health, UserId = int.Parse(id) };
+                        _context.AddAsync(problem);
+                    }
+                    _context.SaveChangesAsync();
+
+                    userManager.UpdateAsync(user);
+                    return Ok("Metrics were saved");
+                }
+                return Unauthorized();
+            }
+            return UnprocessableEntity();
+        }
+
         [Route("Logout")]
         public async Task<IActionResult> Logout()
         {
@@ -93,6 +123,9 @@ namespace FitnessWebApp.Controllers
             return RedirectToAction("api", "login");
            
         }
+
+
+
        /* private async Task Authenticate(string userName)
         {
             // создаем один claim

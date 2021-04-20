@@ -20,7 +20,7 @@ namespace FitnessWebApp.Models
         [Required]
         [Display(Name = "Имя")]
         public string Name { get; set; }
-       
+        //убрать
         [Display(Name = "Возраст")]
         public int Age { get; set; }
         
@@ -32,6 +32,7 @@ namespace FitnessWebApp.Models
        
         [Display(Name = "Пол")]
         public string Gender { get; set; }
+        //убрать
         [Required]
         [Display(Name = "Email")]
         public string Email { get; set; }
