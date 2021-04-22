@@ -8864,23 +8864,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Василий\\.nuget\\packages\\": {},
-    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
+    "C:\\Users\\Andrey\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Василий\\Source\\Repos\\Andey-gh\\FitnessApp-back-end\\FitnessWebApp\\FitnessWebApp.csproj",
+      "projectUniqueName": "G:\\VisualProjects\\FitnessWebApp\\FitnessWebApp\\FitnessWebApp.csproj",
       "projectName": "FitnessWebApp",
-      "projectPath": "C:\\Users\\Василий\\Source\\Repos\\Andey-gh\\FitnessApp-back-end\\FitnessWebApp\\FitnessWebApp.csproj",
-      "packagesPath": "C:\\Users\\Василий\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Василий\\Source\\Repos\\Andey-gh\\FitnessApp-back-end\\FitnessWebApp\\obj\\",
+      "projectPath": "G:\\VisualProjects\\FitnessWebApp\\FitnessWebApp\\FitnessWebApp.csproj",
+      "packagesPath": "C:\\Users\\Andrey\\.nuget\\packages\\",
+      "outputPath": "G:\\VisualProjects\\FitnessWebApp\\FitnessWebApp\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-      ],
       "configFilePaths": [
-        "C:\\Users\\Василий\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Andrey\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
