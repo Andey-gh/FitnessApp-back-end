@@ -20,8 +20,15 @@ namespace FitnessWebApp.Models
         public int Age { get; set; }
         public int Weight { get; set; }
         public int Height { get; set; }
+
+        public int MaxPushUps { get; set; }
+        public int MaxPullUps { get; set; }
+
         [MaxLength(6)]
         public string Gender { get; set; }
-       
+
+        [MaxLength(40)]
+        public string Goal { get; set; }
+
     }
 }

@@ -15,6 +15,7 @@ using FitnessWebApp.Services;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
+using FitnessWebApp.Domain;
 
 namespace FitnessWebApp.Controllers
 {
@@ -27,12 +28,13 @@ namespace FitnessWebApp.Controllers
         
         private readonly UserManager<User> userManager;
         private readonly SignInManager<User> signInManager;
-        
+        private readonly AppDbContext _context;
 
-        public AccountController(UserManager<User> userMgr, SignInManager<User> signinMgr)
+        public AccountController(UserManager<User> userMgr, SignInManager<User> signinMgr, AppDbContext context)
         {
             userManager = userMgr;
             signInManager = signinMgr;
+            _context = context;
            // _httpContext = httpContext;
         }
         [AllowAnonymous]
@@ -81,9 +83,41 @@ namespace FitnessWebApp.Controllers
             }
             return UnprocessableEntity();
         }
-       
 
-        
+        [HttpPost]
+        [AllowAnonymous] //временно,для теста,убрать
+        [Route("sendMetrics/{id}")]
+        public async Task<IActionResult> PostMetrics(MetricsModel model,string id)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await userManager.FindByIdAsync(id);
+                if (user != null)
+                {
+                    user.Age = model.MetricAge;
+                    user.Height = model.MetricHeight;
+                    user.Weight = model.MetricWeight;
+                    user.Goal = model.MetricGoal;
+                    user.MaxPushUps = model.MetricPushUps;
+                    user.MaxPullUps = model.MetricPullUps;
+
+                   for(int i=0;i<model.MetricHealth.Count;i++)
+                    {
+                        HealthProblem problem = new HealthProblem(user.Id, model.MetricHealth[i].Problem);
+                       
+                        await _context.HealthProblems.AddAsync(problem);
+                        await _context.SaveChangesAsync();
+                    }
+                    
+
+                    await userManager.UpdateAsync(user);
+                    return Ok();
+                }
+                return Unauthorized();
+            }
+            return UnprocessableEntity();
+        }
+
         [Route("Logout")]
         public async Task<IActionResult> Logout()
         {
@@ -93,18 +127,21 @@ namespace FitnessWebApp.Controllers
             return RedirectToAction("api", "login");
            
         }
-       /* private async Task Authenticate(string userName)
-        {
-            // создаем один claim
-            var claims = new List<Claim>
-    {
-        new Claim(ClaimsIdentity.DefaultNameClaimType, userName)
-    };
-            // создаем объект ClaimsIdentity
-            ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
-            // установка аутентификационных куки
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
-        }*/
+
+
+        #region AuthTest
+        /* private async Task Authenticate(string userName)
+         {
+             // создаем один claim
+             var claims = new List<Claim>
+     {
+         new Claim(ClaimsIdentity.DefaultNameClaimType, userName)
+     };
+             // создаем объект ClaimsIdentity
+             ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
+             // установка аутентификационных куки
+             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
+         }*/
         /* [HttpPost("Login")]
          public IActionResult Token(LoginViewModel model)
          {
@@ -159,6 +196,7 @@ namespace FitnessWebApp.Controllers
              // если пользователя не найдено
              return null;
          }*/
+        #endregion
 
     }
 }

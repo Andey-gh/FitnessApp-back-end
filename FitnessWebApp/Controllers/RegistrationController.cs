@@ -33,7 +33,7 @@ namespace FitnessWebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                User user = new User { UserName = model.UserLogin, Age = model.Age, Name = model.Name, Weight = model.Weight, Gender = model.Gender, Height = model.Height, Email = model.Email };
+                User user = new User { UserName = model.UserLogin,Name = model.Name,Email = model.Email };
                 // добавляем пользователя
                 var result = await userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
