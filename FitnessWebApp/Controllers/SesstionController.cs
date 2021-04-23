@@ -48,7 +48,7 @@ namespace FitnessWebApp.Controllers
                 {
 
 
-                    return await _context.ExcercisesInPlan.Include(c => c.Excercise).Where(p => p.PlanId == Id && p.Day == Day).Include(c => c.MuscleGroup).ToListAsync();
+                    return await _context.ExcercisesInPlan.Include(c => c.Excercise).Include(c=>c.Excercise.AssistantMuscle).Include(c=>c.Excercise.TargetMuscle).Where(p => p.PlanId == Id && p.Day == Day).Include(c => c.MuscleGroup).ToListAsync();
                 }
                 else
                     return Forbid();
@@ -59,54 +59,34 @@ namespace FitnessWebApp.Controllers
             
         }
 
-        [HttpGet("getPreviousWeekTraining/{id}/{day}/{UserId}")]
+        [HttpGet("getPreviousTraining/{id}/{MuscleGroupId}/{UserId}")]
 
-        public async Task<ActionResult<PreviousTrainViewModel>> GetPreviousTrainHistory(int Id,int Day,string UserId)
+        public async Task<ActionResult<PreviousTrainViewModel>> GetPreviousTrainHistory(int Id,int MuscleGroupId,string UserId)
         {
             var plan = await _context.TrainingPlans.FindAsync(Id);
-            //DateTime day = new DateTime(2021, 03, Day, 11, 30, 0);
-            List<ExcerciseInPlan> exsercise=new List<ExcerciseInPlan>();
-            List<TrainingHistory> trainingHistories = new List<TrainingHistory>();
-            //List<MuscleGroup> muscleGroups = new List<MuscleGroup>();
-            var user = await userManager.FindByIdAsync(UserId);
            
-            {
+            var user = await userManager.FindByIdAsync(UserId);
+
                 if (user == null)
                     return Unauthorized();
-            }
             var user_plans = await _context.PlansOfUsers.Where(x => x.UserId == user.Id).ToListAsync();
-            var trHis = await _context.TrainingHistories.OrderBy(x => x.UserId == user.Id && x.PlanId == Id).OrderBy(p=>p.EndTime).LastAsync();
+            if (user_plans.Count==0)
+                return NoContent();
+            var trHis = await _context.TrainingHistories.Where(x => x.UserId == user.Id && x.PlanId == Id&&x.MuscleGroupId==MuscleGroupId).OrderBy(p=>p.EndTime).LastAsync();
            
-            for(int i=0;i<user_plans.Count;i++)
-            {
-                List<ExcerciseInPlan> excer = new List<ExcerciseInPlan>();
-               excer = await _context.ExcercisesInPlan.Where(x=>x.PlanId==Id&&x.PlanId==user_plans[i].PlanId&x.Day==Day).ToListAsync();
-                for(int k=0;k<excer.Count;k++)
-                {
-                    if (k == 0&&excer[k].Day==Day) { exsercise.Add(excer[k]);}
-                    if (k != 0 && excer[k].Day == excer[k - 1].Day) { exsercise.Add(excer[k]); }
-                
-                
-                }
-            }
-            var TrainHis = await _context.TrainingHistories.Where(p=>p.UserId==user.Id).ToListAsync();
-            
-            for (int i = 0; i < exsercise.Count; i++) 
-            {
+           
                 List<TrainingHistory> trainingHistory = new List<TrainingHistory>();
-                trainingHistory = await _context.TrainingHistories.Where(p =>p.ExcerciseId==exsercise[i].ExcerciseId&&p.UserId==user.Id&&p.EndTime.DayOfYear==trHis.EndTime.DayOfYear).Include(x=>x.Excercise).ToListAsync();
-                if(trainingHistory.Count!=0)
-                trainingHistories.AddRange(trainingHistory);
-            }
+                trainingHistory = await _context.TrainingHistories.Where(p =>p.UserId==user.Id&&p.EndTime.DayOfYear==trHis.EndTime.DayOfYear&&p.MuscleGroupId==MuscleGroupId).Include(x=>x.Excercise).ToListAsync();
+          
             
                 
                 
-            PreviousTrainViewModel trainingHistoryView = new PreviousTrainViewModel(Id, trainingHistories); 
+            PreviousTrainViewModel trainingHistoryView = new PreviousTrainViewModel(Id, trainingHistory); 
 
 
             if (plan != null)
             {
-                if (trainingHistories.Count != 0)
+                if (trainingHistory.Count != 0)
                 {
 
 

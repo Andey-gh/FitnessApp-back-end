@@ -71,7 +71,7 @@ namespace FitnessWebApp.Controllers
                     Microsoft.AspNetCore.Identity.SignInResult result = await signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, true);
                     if (result.Succeeded)
                     {
-                        UserViewModel user_model = new UserViewModel(user.Id,user.Age,user.Name,user.Weight,user.Height,user.Gender,user.Email);
+                        UserViewModel user_model = new UserViewModel(user.Id,user.Age,user.Name,user.Weight,user.Height,user.Gender,user.Email,user.IsMetrics);
                         
 
                         return Json(user_model);
@@ -100,6 +100,7 @@ namespace FitnessWebApp.Controllers
                     user.Goal = model.MetricGoal;
                     user.MaxPushUps = model.MetricPushUps;
                     user.MaxPullUps = model.MetricPullUps;
+                    user.IsMetrics = true;
 
                    for(int i=0;i<model.MetricHealth.Count;i++)
                     {

@@ -33,7 +33,7 @@ namespace FitnessWebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                User user = new User { UserName = model.UserLogin,Name = model.Name,Email = model.Email };
+                User user = new User { UserName = model.UserLogin,Name = model.Name,Email = model.Email,IsMetrics=false };
                 // добавляем пользователя
                 var result = await userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
@@ -80,10 +80,10 @@ namespace FitnessWebApp.Controllers
             var result = await userManager.ConfirmEmailAsync(user, code);
             if (result.Succeeded)
             {
-                UserViewModel user_model = new UserViewModel(user.Id, user.Age, user.Name, user.Weight, user.Height, user.Gender, user.Email);
+               // UserViewModel user_model = new UserViewModel(user.Id, user.Age, user.Name, user.Weight, user.Height, user.Gender, user.Email);
                 PlansOfUser plansOfUser = new PlansOfUser();
                 plansOfUser.PlanId = 1;
-                plansOfUser.UserId = user_model.Id;
+                plansOfUser.UserId = user.Id;
                 await _context.PlansOfUsers.AddAsync(plansOfUser);
                 await _context.SaveChangesAsync();
                 await signInManager.SignOutAsync();

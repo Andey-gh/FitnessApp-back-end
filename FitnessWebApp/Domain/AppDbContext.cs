@@ -23,6 +23,7 @@ namespace FitnessWebApp.Domain
         public DbSet<PlansOfUser> PlansOfUsers { get; set; }
 
         public DbSet<HealthProblem> HealthProblems { get; set; }
+        public DbSet<Muscle> Muscles { get; set; }
 
     }
     

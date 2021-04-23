@@ -29,6 +29,7 @@ namespace FitnessWebApp.Models
 
         [MaxLength(40)]
         public string Goal { get; set; }
+        public bool IsMetrics { get; set; }
 
     }
 }

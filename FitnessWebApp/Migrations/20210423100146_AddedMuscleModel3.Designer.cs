@@ -3,14 +3,16 @@ using System;
 using FitnessWebApp.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FitnessWebApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210423100146_AddedMuscleModel3")]
+    partial class AddedMuscleModel3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,6 +35,9 @@ namespace FitnessWebApp.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
+
+                    b.Property<string>("Photo")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<int?>("TargetMuscleId")
                         .HasColumnType("int");
@@ -111,6 +116,9 @@ namespace FitnessWebApp.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
+
+                    b.Property<string>("Photo")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.HasKey("Id");
 
@@ -264,11 +272,11 @@ namespace FitnessWebApp.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("varchar(40) CHARACTER SET utf8mb4");
 
-                    b.Property<bool>("HasMetrics")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<int>("Height")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsMetrics")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("tinyint(1)");

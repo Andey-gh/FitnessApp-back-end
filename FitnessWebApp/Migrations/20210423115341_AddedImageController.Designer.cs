@@ -3,14 +3,16 @@ using System;
 using FitnessWebApp.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FitnessWebApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210423115341_AddedImageController")]
+    partial class AddedImageController
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -264,11 +266,11 @@ namespace FitnessWebApp.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("varchar(40) CHARACTER SET utf8mb4");
 
-                    b.Property<bool>("HasMetrics")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<int>("Height")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsMetrics")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("tinyint(1)");

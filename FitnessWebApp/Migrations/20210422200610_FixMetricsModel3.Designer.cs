@@ -3,14 +3,16 @@ using System;
 using FitnessWebApp.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FitnessWebApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210422200610_FixMetricsModel3")]
+    partial class FixMetricsModel3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -23,9 +25,6 @@ namespace FitnessWebApp.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int?>("AssistantMuscleId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Description")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
@@ -34,14 +33,10 @@ namespace FitnessWebApp.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
 
-                    b.Property<int?>("TargetMuscleId")
-                        .HasColumnType("int");
+                    b.Property<string>("Photo")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AssistantMuscleId");
-
-                    b.HasIndex("TargetMuscleId");
 
                     b.ToTable("Excercises");
                 });
@@ -99,22 +94,6 @@ namespace FitnessWebApp.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("HealthProblems");
-                });
-
-            modelBuilder.Entity("FitnessWebApp.Models.Muscle", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Muscles");
                 });
 
             modelBuilder.Entity("FitnessWebApp.Models.MuscleGroup", b =>
@@ -264,11 +243,11 @@ namespace FitnessWebApp.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("varchar(40) CHARACTER SET utf8mb4");
 
-                    b.Property<bool>("HasMetrics")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<int>("Height")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsMetrics")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("tinyint(1)");
@@ -454,21 +433,6 @@ namespace FitnessWebApp.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens");
-                });
-
-            modelBuilder.Entity("FitnessWebApp.Models.Excercise", b =>
-                {
-                    b.HasOne("FitnessWebApp.Models.Muscle", "AssistantMuscle")
-                        .WithMany()
-                        .HasForeignKey("AssistantMuscleId");
-
-                    b.HasOne("FitnessWebApp.Models.Muscle", "TargetMuscle")
-                        .WithMany()
-                        .HasForeignKey("TargetMuscleId");
-
-                    b.Navigation("AssistantMuscle");
-
-                    b.Navigation("TargetMuscle");
                 });
 
             modelBuilder.Entity("FitnessWebApp.Models.ExcerciseInPlan", b =>
