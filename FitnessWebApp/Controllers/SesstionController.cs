@@ -35,20 +35,36 @@ namespace FitnessWebApp.Controllers
             var plan = await _context.TrainingPlans.FindAsync(Id);
             var user = await userManager.FindByIdAsync(UserId);
            
-            {
+           
                 if (user == null)
                     return Unauthorized();
-            }
-            var userplan = await _context.PlansOfUsers.Where(p => p.UserId == user.Id&&p.PlanId==Id).ToListAsync();
-            
-            
-            if (plan!= null)
+
+            if (plan!= null) 
             {
+                var userplan = await _context.PlansOfUsers.Where(p => p.UserId == user.Id&&p.PlanId==Id).ToListAsync();
                 if (userplan.Count!=0)
                 {
-
-
-                    return await _context.ExcercisesInPlan.Include(c => c.Excercise).Include(c=>c.Excercise.AssistantMuscle).Include(c=>c.Excercise.TargetMuscle).Where(p => p.PlanId == Id && p.Day == Day).Include(c => c.MuscleGroup).ToListAsync();
+                    var userExser= await _context.ExcercisesInPlan.Include(c => c.Excercise).Include(c => c.Excercise.AssistantMuscle).Include(c => c.Excercise.TargetMuscle).Where(p => p.PlanId == Id && p.Day == Day).Include(c => c.MuscleGroup).ToListAsync();
+                    if(userExser.Count!=0)
+                    { 
+                    List<ExscercisePlanViewModel> excercises = new List<ExscercisePlanViewModel>();
+                    for(int i=0;i<userExser.Count;i++)
+                    {
+                            ExscercisePlanViewModel excer = new ExscercisePlanViewModel();
+                            excer.setsNumber = userExser[i].SetsNumber;
+                            excer.Id = userExser[i].Excercise.Id;
+                            excer.Name = userExser[i].Excercise.Name;
+                            excer.TargetMuscleId = userExser[i].Excercise.TargetMuscleId;
+                            excer.AssistantMuscleId= userExser[i].Excercise.AssistantMuscleId;
+                            excer.Description = userExser[i].Excercise.Description;
+                            excer.TargetMuscle = userExser[i].Excercise.TargetMuscle;
+                            excer.AssistantMuscle = userExser[i].Excercise.AssistantMuscle;
+                            excercises.Add(excer);
+                    }
+                    var trainingPlan = new TrainingPlanViewModel() { planId = userExser[0].PlanId, muscleGroupId = userExser[0].MuscleGroupId, excercises = excercises, muscleGroupName = userExser[0].MuscleGroup.Name, planDiscription = userExser[0].TrainingPlan.Discription,day=userExser[0].Day};
+                        return Json(trainingPlan);
+                    }
+                    return Forbid();
                 }
                 else
                     return Forbid();
