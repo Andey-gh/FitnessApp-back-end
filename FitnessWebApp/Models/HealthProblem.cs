@@ -18,7 +18,7 @@ namespace FitnessWebApp.Models
         [ForeignKey(nameof(UserId))]
         public User User { get; set; }
 
-        [Required]
+        
         [Display(Name = "Проблема со здоровьем")]
         [MaxLength(50)]
         public string Problem { get; set; }
