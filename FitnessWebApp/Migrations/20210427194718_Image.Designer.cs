@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FitnessWebApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20210423115341_AddedImageController")]
-    partial class AddedImageController
+    [Migration("20210427194718_Image")]
+    partial class Image
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -89,7 +89,6 @@ namespace FitnessWebApp.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Problem")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
 

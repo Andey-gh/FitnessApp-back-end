@@ -19,6 +19,7 @@ namespace FitnessWebApp.Models
         public string Name { get; set; }
         [NotMapped]
         [Display(Name = "Фото мышцы")]
+       
         public IFormFile Photo { get; set; }
     }
 }

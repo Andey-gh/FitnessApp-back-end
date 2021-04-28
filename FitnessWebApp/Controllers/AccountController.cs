@@ -35,7 +35,7 @@ namespace FitnessWebApp.Controllers
             userManager = userMgr;
             signInManager = signinMgr;
             _context = context;
-           // _httpContext = httpContext;
+           
         }
         [AllowAnonymous]
         public IActionResult Login(string returnUrl)
@@ -46,16 +46,74 @@ namespace FitnessWebApp.Controllers
 
 
         [HttpGet]
-        [Route("profile/{id}")]
+        [Route("UserMetrics/{id}")]
         [AllowAnonymous]
-        public async Task<IActionResult> Profile(string id)
+        public async Task<IActionResult> GetMetrics(string id)
         {
-            //var userId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "UserName").Value.ToString();
+            
             var user = await userManager.FindByIdAsync(id);
-         
-            return Json(user);
+            if (user != null)
+            {
+                var user_health = _context.HealthProblems.Where(x => x.UserId == id).ToList();
+                List<string> health_problems = new List<string>();
+                if (user_health != null)
+                {
+                    
+                    for (int i = 0; i < user_health.Count; i++)
+                    {
+                        health_problems.Add(user_health[i].Problem);
+                    }
+                }
+                var user_metrics = new UserProfileViewModel() { MetricAge = user.Age, MetricGoal = user.Goal, HealthProblems = health_problems, MetricHeight = user.Height, MetricPullUps = user.MaxPullUps, MetricPushUps = user.MaxPushUps, MetricWeight = user.Weight, Name = user.Name ,MetricGender=user.Gender};
+              
+                return Json(user_metrics);
+            }
+            return Unauthorized();
         }
-      
+        [HttpPatch]
+        [Route("UserMetrics/{id}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UpdateMetrics(string id,UserMetricsUpdateModel UserMetrics)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await userManager.FindByIdAsync(id);
+                if (user != null)
+                {
+                    user.Name = UserMetrics.Name;
+                    user.Weight = UserMetrics.MetricWeight;
+                    user.Age = UserMetrics.MetricAge;
+                    user.Gender = UserMetrics.MetricGender;
+                    user.Goal = UserMetrics.MetricGoal;
+                    user.Height = UserMetrics.MetricHeight;
+                    for(int i=0;i<UserMetrics.MetricHealth.Count;i++)
+                    {
+                        UserMetrics.MetricHealth[i].UserId = id;
+                    }
+                    await userManager.UpdateAsync(user);
+                    await _context.SaveChangesAsync();
+                    var user_health = _context.HealthProblems.Where(x => x.UserId == id).ToList();
+                    _context.HealthProblems.RemoveRange(user_health);
+                    await _context.SaveChangesAsync();
+                   await _context.HealthProblems.AddRangeAsync(UserMetrics.MetricHealth);
+                    await _context.SaveChangesAsync();
+                    /* if(UserMetrics.MetricHealth.Count>user_health.Count)
+                     {
+                         for(int i=UserMetrics.MetricHealth.Count-(UserMetrics.MetricHealth.Count - user_health.Count);i< UserMetrics.MetricHealth.Count;i++)
+                         {
+                            await _context.HealthProblems.AddAsync(UserMetrics.MetricHealth[i]);
+                             await _context.SaveChangesAsync();
+                         }
+
+                     }*/
+
+                    return Ok();
+                }
+                return Unauthorized();
+            }
+            return UnprocessableEntity();
+        }
+
         [HttpPost]
         [Route("login")]
         [AllowAnonymous]
@@ -94,6 +152,7 @@ namespace FitnessWebApp.Controllers
                 var user = await userManager.FindByIdAsync(id);
                 if (user != null)
                 {
+                   
                     user.Age = model.MetricAge;
                     user.Height = model.MetricHeight;
                     user.Weight = model.MetricWeight;
@@ -101,6 +160,7 @@ namespace FitnessWebApp.Controllers
                     user.MaxPushUps = model.MetricPushUps;
                     user.MaxPullUps = model.MetricPullUps;
                     user.IsMetrics = true;
+                    
 
                    for(int i=0;i<model.MetricHealth.Count;i++)
                     {

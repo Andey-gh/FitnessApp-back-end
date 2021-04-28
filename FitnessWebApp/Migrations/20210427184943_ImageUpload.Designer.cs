@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FitnessWebApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20210423141857_HasMetrics")]
-    partial class HasMetrics
+    [Migration("20210427184943_ImageUpload")]
+    partial class ImageUpload
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -89,7 +89,6 @@ namespace FitnessWebApp.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Problem")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
 
@@ -113,6 +112,9 @@ namespace FitnessWebApp.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
+
+                    b.Property<byte[]>("Photo")
+                        .HasColumnType("longblob");
 
                     b.HasKey("Id");
 
@@ -266,11 +268,11 @@ namespace FitnessWebApp.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("varchar(40) CHARACTER SET utf8mb4");
 
-                    b.Property<bool>("HasMetrics")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<int>("Height")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsMetrics")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("tinyint(1)");
