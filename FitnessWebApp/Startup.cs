@@ -49,7 +49,8 @@ namespace FitnessWebApp
                 opts.Password.RequireLowercase = true;
                 opts.Password.RequireUppercase = true;
                 opts.Password.RequireDigit = true;
-            }).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
+                opts.Tokens.PasswordResetTokenProvider = ResetPasswordTokenProvider.ProviderKey;
+            }).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders().AddTokenProvider<ResetPasswordTokenProvider>(ResetPasswordTokenProvider.ProviderKey);
             services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.Name = "fitnessWebApp";
