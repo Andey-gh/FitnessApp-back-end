@@ -2,11 +2,24 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>36a856ef-6793-4f9b-9696-4aa6f255181b</UserSecretsId>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="Views\PasswordReset\Error.cshtml" />
+    <Content Remove="Views\PasswordReset\ForgotPasswordConfirmation.cshtml" />
+    <Content Remove="Views\PasswordReset\ResetPasswordConfirmation.cshtml" />
+  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Managers\" />
     <Folder Include="wwwroot\Images\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Views\PasswordReset\Error.cshtml" />
+    <None Include="Views\PasswordReset\ForgotPasswordConfirmation.cshtml" />
+    <None Include="Views\PasswordReset\ResetPasswordConfirmation.cshtml" />
   </ItemGroup>
 
   <ItemGroup>

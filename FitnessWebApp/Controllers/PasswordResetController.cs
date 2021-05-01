@@ -27,29 +27,37 @@ namespace FitnessWebApp.Controllers
         [HttpPost]
         [Route("ForgotPassword")]
         [AllowAnonymous]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordModel model)
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByEmailAsync(model.Email);
                 if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
                 {
-                    return Unauthorized();
+                    return View("ForgotPasswordConfirmation");
                 }
 
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-    
+                var callbackUrl = Url.Action("ResetPassword", "PasswordReset", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
                 EmailService emailService = new EmailService();
-                await emailService.SendEmailAsync(model.Email, "Reset Password",$"Код для сброса пароля: {code}");
-                return Ok("Confirmation link was sended to your email");
+                await emailService.SendEmailAsync(model.Email, "Reset Password",$"Для сброса пароля пройдите по ссылке{code}: <a href='{callbackUrl}'>link</a>");
+                return View("ForgotPasswordConfirmation");
             }
             return UnprocessableEntity();
+        }
+
+        [HttpGet]
+        [Route("ResetPassword")]
+        [AllowAnonymous]
+        public IActionResult ResetPassword(string code = null)
+        {
+            return code == null ? View("Error") : View();
         }
 
         [HttpPost]
         [Route("ResetPassword")]
         [AllowAnonymous]
-        public async Task<IActionResult> ResetPassword(ResetPasswordModel model)
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -58,12 +66,12 @@ namespace FitnessWebApp.Controllers
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
-                return Ok("ResetPasswordConfirmation");
+                return View("ResetPasswordConfirmation");
             }
             var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
             if (result.Succeeded)
             {
-                return Ok("ResetPasswordConfirmation");
+                return View("ResetPasswordConfirmation");
             }
             foreach (var error in result.Errors)
             {
