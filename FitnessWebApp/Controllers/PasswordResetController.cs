@@ -35,14 +35,14 @@ namespace FitnessWebApp.Controllers
                 var user = await _userManager.FindByEmailAsync(model.Email);
                 if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
                 {
-                    return Json(JsonConvert.SerializeObject(new { Status = "ForgotPasswordConfirmation" }));
+                    return Ok("ForgotPasswordConfirmation");
                 }
 
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var callbackUrl = Url.Action("ResetPassword", "PasswordReset", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
                 EmailService emailService = new EmailService();
                 await emailService.SendEmailAsync(model.Email, "Reset Password",$"Для сброса пароля введите код: {code}");
-                return Json(JsonConvert.SerializeObject(new { Status = "ForgotPasswordConfirmation" }));
+                return Ok("ForgotPasswordConfirmation");
             }
             return UnprocessableEntity();
         }

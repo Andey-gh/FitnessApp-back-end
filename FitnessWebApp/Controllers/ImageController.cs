@@ -46,27 +46,6 @@ namespace FitnessWebApp.Controllers
 
                 await ImageFile.CopyToAsync(fileStream);
             }
-            
-            // считываем переданный файл в массив байтов
-            //using (var binaryReader = new BinaryReader(ImageFile.OpenReadStream()))
-            //{
-            //imageData = binaryReader.ReadBytes((int)ImageFile.Length);
-            //}
-            // установка массива байтов
-            //person.Avatar = imageData;
-           // using var fileStr = ImageFile.OpenReadStream();
-           // byte[] bytes = new byte[ImageFile.Length];
-           // fileStr.Read(bytes, 0, (int)ImageFile.Length);
-           // exsercise.Photo = bytes;
-            using (var fs = ImageFile.OpenReadStream())
-            using (var ms = new MemoryStream())
-            {
-                fs.CopyTo(ms);
-                var avatar = ms.ToArray();
-            }
-
-            _context.Muscles.Update(exsercise);
-            await _context.SaveChangesAsync();
             return Ok();
         }
     }

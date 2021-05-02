@@ -6,20 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Views\PasswordReset\Error.cshtml" />
-    <Content Remove="Views\PasswordReset\ForgotPasswordConfirmation.cshtml" />
-    <Content Remove="Views\PasswordReset\ResetPasswordConfirmation.cshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="Managers\" />
+    <Folder Include="Views\PasswordReset\" />
     <Folder Include="wwwroot\Images\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Views\PasswordReset\Error.cshtml" />
-    <None Include="Views\PasswordReset\ForgotPasswordConfirmation.cshtml" />
-    <None Include="Views\PasswordReset\ResetPasswordConfirmation.cshtml" />
   </ItemGroup>
 
   <ItemGroup>
