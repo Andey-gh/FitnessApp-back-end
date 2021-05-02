@@ -86,16 +86,16 @@ namespace FitnessWebApp.Controllers
                     user.Gender = UserMetrics.MetricGender;
                     user.Goal = UserMetrics.MetricGoal;
                     user.Height = UserMetrics.MetricHeight;
-                    for(int i=0;i<UserMetrics.MetricHealth.Count;i++)
+                    for(int i=0;i<UserMetrics.healthProblems.Count;i++)
                     {
-                        UserMetrics.MetricHealth[i].UserId = id;
+                        UserMetrics.healthProblems[i].UserId = id;
                     }
                     await userManager.UpdateAsync(user);
                     await _context.SaveChangesAsync();
                     var user_health = _context.HealthProblems.Where(x => x.UserId == id).ToList();
                     _context.HealthProblems.RemoveRange(user_health);
                     await _context.SaveChangesAsync();
-                   await _context.HealthProblems.AddRangeAsync(UserMetrics.MetricHealth);
+                   await _context.HealthProblems.AddRangeAsync(UserMetrics.healthProblems);
                     await _context.SaveChangesAsync();
                     /* if(UserMetrics.MetricHealth.Count>user_health.Count)
                      {
@@ -150,6 +150,7 @@ namespace FitnessWebApp.Controllers
             if (ModelState.IsValid)
             {
                 var user = await userManager.FindByIdAsync(id);
+                
                 if (user != null)
                 {
                    
