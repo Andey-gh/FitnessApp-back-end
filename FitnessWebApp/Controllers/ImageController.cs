@@ -36,7 +36,7 @@ namespace FitnessWebApp.Controllers
             string extension = Path.GetExtension(ImageFile.FileName);
             fileName = fileName + DateTime.Now.ToString("yymmssfff") + extension;
             string path = Path.Combine(wwwRootPath + "/Image_" + fileName);
-            return Ok(path);
+
             using (var fileStream = new FileStream(path, FileMode.Create))
             {
 

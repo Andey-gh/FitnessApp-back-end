@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FitnessWebApp.Services;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace FitnessWebApp.Controllers
 {
@@ -18,11 +19,11 @@ namespace FitnessWebApp.Controllers
     {
 
         private readonly UserManager<User> _userManager;
-
-        public PasswordResetController(UserManager<User> userManager)
+        private readonly IConfiguration _configuration;
+        public PasswordResetController(UserManager<User> userManager, IConfiguration configuration)
         {
             _userManager = userManager;
-
+            _configuration = configuration;
         }
 
         [HttpPost]
@@ -35,14 +36,14 @@ namespace FitnessWebApp.Controllers
                 var user = await _userManager.FindByEmailAsync(model.Email);
                 if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
                 {
-                    return Ok("ForgotPasswordConfirmation");
+                    return Ok("Mail with code was sent");
                 }
 
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var callbackUrl = Url.Action("ResetPassword", "PasswordReset", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
-                EmailService emailService = new EmailService();
+                EmailService emailService = new EmailService(_configuration);
                 await emailService.SendEmailAsync(model.Email, "Reset Password",$"Для сброса пароля введите код: {code}");
-                return Ok("ForgotPasswordConfirmation");
+                return Ok("Mail with code was sent");
             }
             return UnprocessableEntity();
         }
@@ -60,12 +61,12 @@ namespace FitnessWebApp.Controllers
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
-                return Ok("ResetPasswordConfirmation");
+                return Ok("Password has been reset successfully");
             }
             var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
             if (result.Succeeded)
             {
-                return Ok("ResetPasswordConfirmation");
+                return Ok("Password has been reset successfully");
             }
             foreach (var error in result.Errors)
             {

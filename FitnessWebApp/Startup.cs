@@ -20,10 +20,9 @@ namespace FitnessWebApp
 {
     public class Startup
     {
-        public Startup()
+        public Startup(IConfiguration ñonfiguration)
         {
-            var builder = new ConfigurationBuilder().AddJsonFile("appsettings.json");
-            Configuration = builder.Build();
+            Configuration = ñonfiguration;
         }
 
         public IConfiguration Configuration { get;}
