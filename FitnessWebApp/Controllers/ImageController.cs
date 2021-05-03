@@ -31,10 +31,6 @@ namespace FitnessWebApp.Controllers
 
         public async Task<IActionResult> AddImage([FromForm(Name = "file")] IFormFile ImageFile)
         {
-            var exsercise = await _context.Muscles.FindAsync(1);
-            if (exsercise == null)
-                return NotFound();
-
             string wwwRootPath = _environment.WebRootPath;
             string fileName = Path.GetFileNameWithoutExtension(ImageFile.FileName);
             string extension = Path.GetExtension(ImageFile.FileName);
@@ -46,27 +42,7 @@ namespace FitnessWebApp.Controllers
 
                 await ImageFile.CopyToAsync(fileStream);
             }
-            
-            // считываем переданный файл в массив байтов
-            //using (var binaryReader = new BinaryReader(ImageFile.OpenReadStream()))
-            //{
-            //imageData = binaryReader.ReadBytes((int)ImageFile.Length);
-            //}
-            // установка массива байтов
-            //person.Avatar = imageData;
-           // using var fileStr = ImageFile.OpenReadStream();
-           // byte[] bytes = new byte[ImageFile.Length];
-           // fileStr.Read(bytes, 0, (int)ImageFile.Length);
-           // exsercise.Photo = bytes;
-            //using (var fs = ImageFile.OpenReadStream())
-            //using (var ms = new MemoryStream())
-            //{
-               // fs.CopyTo(ms);
-               // var avatar = ms.ToArray();
-            //}
 
-           // _context.Muscles.Update(exsercise);
-            //await _context.SaveChangesAsync();
             return Ok();
         }
     }

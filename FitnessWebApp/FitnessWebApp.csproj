@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>36a856ef-6793-4f9b-9696-4aa6f255181b</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -35,6 +36,6 @@
     <PackageReference Include="System.Security.Claims" Version="4.3.0" />
   </ItemGroup>
 
-  <ProjectExtensions><VisualStudio><UserProperties libman_1json__JsonSchema="https://json.schemastore.org/local.settings.json" /></VisualStudio></ProjectExtensions>
+  <ProjectExtensions><VisualStudio><UserProperties libman_1json__JsonSchema="https://json.schemastore.org/local.settings.json" properties_4launchsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
 </Project>

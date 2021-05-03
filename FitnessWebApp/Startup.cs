@@ -20,25 +20,20 @@ namespace FitnessWebApp
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration сonfiguration)
         {
-            Configuration = configuration;
+            Configuration = сonfiguration;
         }
 
-        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get;}
 
 
 
             // This method gets called by the runtime. Use this method to add services to the container.
-            public void ConfigureServices(IServiceCollection services)
-        {
+            public void ConfigureServices(IServiceCollection services){
             services.AddDistributedMemoryCache();
             services.AddSession();
-
-            //services.AddDbContext<AppDbContext>(options =>
-            // options.UseSqlServer("Server=DESKTOP-FHIPLI2;Database=fitnessapplication;Trusted_Connection=True;MultipleActiveResultSets=true;"));
-            services.AddDbContext<AppDbContext>(options => options.UseMySql("server=20.52.143.162;user=vasakot;password=Svetlana2001_;database=fitnesswebapp;port=3306;Connect Timeout=20;"));
-            //services.AddDbContext<AppDbContext>(options => options.UseMySql(Configuration.GetConnectionString("Default")));
+            services.AddDbContext<AppDbContext>(options => options.UseMySql(Configuration.GetConnectionString("Release")));
             //настраиваем identity систему
             services.AddIdentity<User, IdentityRole>(opts =>
             {
@@ -49,7 +44,8 @@ namespace FitnessWebApp
                 opts.Password.RequireLowercase = true;
                 opts.Password.RequireUppercase = true;
                 opts.Password.RequireDigit = true;
-            }).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
+                opts.Tokens.PasswordResetTokenProvider = ResetPasswordTokenProvider.ProviderKey;
+            }).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders().AddTokenProvider<ResetPasswordTokenProvider>(ResetPasswordTokenProvider.ProviderKey);
             services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.Name = "fitnessWebApp";
@@ -60,59 +56,18 @@ namespace FitnessWebApp
                 options.SlidingExpiration = true;
                 options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
                 options.ExpireTimeSpan= TimeSpan.FromHours(24);
-                
-                
-                
-
-                // options.Cookie.Expiration= TimeSpan.FromMinutes(20);
-
 
             });
-           /* services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                   .AddJwtBearer(options =>
-                   {
-                       options.RequireHttpsMetadata = false;
-                       options.TokenValidationParameters = new TokenValidationParameters
-                       {
-                            // укзывает, будет ли валидироваться издатель при валидации токена
-                            ValidateIssuer = true,
-                            // строка, представляющая издателя
-                            ValidIssuer = AuthOptions.ISSUER,
-
-                            // будет ли валидироваться потребитель токена
-                            ValidateAudience = true,
-                            // установка потребителя токена
-                            ValidAudience = AuthOptions.AUDIENCE,
-                            // будет ли валидироваться время существования
-                            ValidateLifetime = true,
-
-                            // установка ключа безопасности
-                            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
-                            // валидация ключа безопасности
-                            ValidateIssuerSigningKey = true,
-                       };
-                   });*/
+           
             services.AddControllersWithViews();
-           /* services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "FitnessWebApp", Version = "v1" });
-            });*/
+          
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                //app.UseDeveloperExceptionPage();
-                //app.UseSwagger();
-                //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "FitnessWebApp v1"));
-            }
-             app.UseSession();
-         
-
+            app.UseSession();
             app.UseHttpsRedirection();
-
             app.UseRouting();
             app.UseStaticFiles();
 
@@ -121,26 +76,14 @@ namespace FitnessWebApp
                .AllowAnyHeader()
                .SetIsOriginAllowed(origin => true) // allow any origin
                .AllowCredentials()); // allow credentials
-             /* app.Run(async (context) =>
-            {
-                if (context.Session.Keys.Contains("name"))
-                    //await context.Response.WriteAsync($"Hello {context.Session.GetString("value")}!");
-                await context.Response.StartAsync();
-                else
-                {
-                    context.Session.SetString("name", "Tom");
-                    await context.Response.;
-                }
-            });*/
+           
             app.UseCookiePolicy();
             app.UseAuthentication();
-            
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
-                //endpoints.MapControllers();
-                endpoints.MapControllerRoute("default", "{controller=TrainingPlan}/{action=GetPlans}");
+                endpoints.MapControllerRoute("/", "{controller=Home}/{action=Index}");
             });
         }
     }

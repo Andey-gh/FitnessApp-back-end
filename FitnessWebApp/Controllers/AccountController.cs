@@ -97,15 +97,6 @@ namespace FitnessWebApp.Controllers
                     await _context.SaveChangesAsync();
                    await _context.HealthProblems.AddRangeAsync(UserMetrics.healthProblems);
                     await _context.SaveChangesAsync();
-                    /* if(UserMetrics.MetricHealth.Count>user_health.Count)
-                     {
-                         for(int i=UserMetrics.MetricHealth.Count-(UserMetrics.MetricHealth.Count - user_health.Count);i< UserMetrics.MetricHealth.Count;i++)
-                         {
-                            await _context.HealthProblems.AddAsync(UserMetrics.MetricHealth[i]);
-                             await _context.SaveChangesAsync();
-                         }
-
-                     }*/
 
                     return Ok();
                 }

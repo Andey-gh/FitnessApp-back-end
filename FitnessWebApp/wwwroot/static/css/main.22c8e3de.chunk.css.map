@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack://src/index.css"],"names":[],"mappings":"AAAA,QACE,YACF,CAEA,cACE,eACF,CAEA,UACE,qBAAyB,CACzB,UACF","file":"main.22c8e3de.chunk.css","sourcesContent":["div.app {\r\n  height: 100vh;\r\n}\r\n\r\ndiv.app.light {\r\n  background: #eeeeee;\r\n}\r\n\r\n.app.dark {\r\n  background-color: #333333;\r\n  color: white;\r\n}\r\n"]}
