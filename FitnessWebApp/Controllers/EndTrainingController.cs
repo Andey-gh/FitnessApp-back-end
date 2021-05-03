@@ -34,10 +34,6 @@ namespace FitnessWebApp.Controllers
         {
             if(ModelState.IsValid)
             {
-            //var t = JsonConvert.DeserializeObject<EndTrainingViewModel>(jsonString.ToString());
-                // var listOfObjectsResult = Json.Decode<List<EndTrainingViewModel>>(jsonString);
-               // string output = JsonConvert.SerializeObject(jsonString);
-                //List<EndTrainingViewModel> t = JsonConvert.DeserializeObject<List<EndTrainingViewModel>>(jsonString.ToString());
                 var user = await userManager.FindByIdAsync(Id);
                 {
                     if (user == null)

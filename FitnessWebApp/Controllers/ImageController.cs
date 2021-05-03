@@ -49,15 +49,31 @@ namespace FitnessWebApp.Controllers
             var responce = new { Name = fileName, URL = url };
             return Json(responce);
         }
-
+        /*
         [HttpPost]
         [AllowAnonymous]
         [Route("setImage")]
-        public async Task<IActionResult> SetImage()
+        public async Task<IActionResult> SetImage(FileModel file)
         {
-            return Ok();
+            if (ModelState.IsValid) {
+                if (file.Type != "Image") return StatusCode(400);
+                switch (file.Table)
+                {
+                    case "Muscles": {
+                       int id;
+                       if(!int.TryParse(file.Id,out id)) return StatusCode(400);
+                       var muscle = await _context.Muscles.FindAsync(id);
+                    }; break;
+                    case "MuscleGroup": ; break;
+                    case "Excercises": ; break;
+                    case "TrainingPlans": ; break;
+                    default: return StatusCode(501);break;
+                }
+                return Ok();
+            }
+            return UnprocessableEntity();
         }
-
+        */
 
         }
 }
