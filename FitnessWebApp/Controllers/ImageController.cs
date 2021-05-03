@@ -58,15 +58,15 @@ namespace FitnessWebApp.Controllers
            // byte[] bytes = new byte[ImageFile.Length];
            // fileStr.Read(bytes, 0, (int)ImageFile.Length);
            // exsercise.Photo = bytes;
-            using (var fs = ImageFile.OpenReadStream())
-            using (var ms = new MemoryStream())
-            {
-                fs.CopyTo(ms);
-                var avatar = ms.ToArray();
-            }
+            //using (var fs = ImageFile.OpenReadStream())
+            //using (var ms = new MemoryStream())
+            //{
+               // fs.CopyTo(ms);
+               // var avatar = ms.ToArray();
+            //}
 
-            _context.Muscles.Update(exsercise);
-            await _context.SaveChangesAsync();
+           // _context.Muscles.Update(exsercise);
+            //await _context.SaveChangesAsync();
             return Ok();
         }
     }

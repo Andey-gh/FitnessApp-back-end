@@ -88,11 +88,17 @@ namespace FitnessWebApp.Controllers
             var user_plans = await _context.PlansOfUsers.Where(x => x.UserId == user.Id).ToListAsync();
             if (user_plans.Count==0)
                 return NoContent();
-            var trHis = await _context.TrainingHistories.Where(x => x.UserId == user.Id && x.PlanId == Id&&x.MuscleGroupId==MuscleGroupId).OrderBy(p=>p.EndTime).LastAsync();
+
+            var trHis = await _context.TrainingHistories.Where(x => x.UserId == user.Id && x.PlanId == Id&&x.MuscleGroupId==MuscleGroupId).ToListAsync();
+            if (trHis.Count == 0)
+            {
+                return NoContent();
+            }
+            var History = trHis.OrderBy(p => p.EndTime).Last();
            
            
                 List<TrainingHistory> trainingHistory = new List<TrainingHistory>();
-                trainingHistory = await _context.TrainingHistories.Where(p =>p.UserId==user.Id&&p.EndTime.DayOfYear==trHis.EndTime.DayOfYear&&p.MuscleGroupId==MuscleGroupId).Include(x=>x.Excercise).ToListAsync();
+                trainingHistory = await _context.TrainingHistories.Where(p =>p.UserId==user.Id&&p.EndTime.DayOfYear==History.EndTime.DayOfYear&&p.MuscleGroupId==MuscleGroupId).Include(x=>x.Excercise).ToListAsync();
           
             
                 
