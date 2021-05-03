@@ -57,7 +57,7 @@ namespace FitnessWebApp.Controllers
                 }
                 else
                 {
-                    return StatusCode(501);
+                    return StatusCode(500);
                 }
             }
             return UnprocessableEntity();
@@ -90,7 +90,7 @@ namespace FitnessWebApp.Controllers
                 return Redirect("/login");
                 //return Json(user_model);
             }
-            else return StatusCode(501);
+            return StatusCode(500);
         }
         
     }

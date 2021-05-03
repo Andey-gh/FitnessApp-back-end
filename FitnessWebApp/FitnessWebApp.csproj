@@ -8,6 +8,7 @@
   <ItemGroup>
     <Folder Include="Managers\" />
     <Folder Include="wwwroot\Images\" />
+    <Folder Include="wwwroot\Images\" />
   </ItemGroup>
 
   <ItemGroup>
