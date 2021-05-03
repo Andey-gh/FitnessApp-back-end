@@ -31,16 +31,12 @@ namespace FitnessWebApp.Controllers
 
         public async Task<IActionResult> AddImage([FromForm(Name = "file")] IFormFile ImageFile)
         {
-            var exsercise = await _context.Muscles.FindAsync(1);
-            if (exsercise == null)
-                return NotFound();
-
             string wwwRootPath = _environment.WebRootPath;
             string fileName = Path.GetFileNameWithoutExtension(ImageFile.FileName);
             string extension = Path.GetExtension(ImageFile.FileName);
             fileName = fileName + DateTime.Now.ToString("yymmssfff") + extension;
             string path = Path.Combine(wwwRootPath + "/Image_" + fileName);
-
+            return Ok(path);
             using (var fileStream = new FileStream(path, FileMode.Create))
             {
 

@@ -71,7 +71,7 @@ namespace FitnessWebApp.Controllers
             {
                 ModelState.AddModelError(string.Empty, error.Description);
             }
-            return Ok(model);
+            return StatusCode(501);
         }
 
 

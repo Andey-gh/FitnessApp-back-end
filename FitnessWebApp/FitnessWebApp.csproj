@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <Folder Include="Managers\" />
-    <Folder Include="Views\PasswordReset\" />
     <Folder Include="wwwroot\Images\" />
   </ItemGroup>
 
@@ -37,6 +36,6 @@
     <PackageReference Include="System.Security.Claims" Version="4.3.0" />
   </ItemGroup>
 
-  <ProjectExtensions><VisualStudio><UserProperties libman_1json__JsonSchema="https://json.schemastore.org/local.settings.json" /></VisualStudio></ProjectExtensions>
+  <ProjectExtensions><VisualStudio><UserProperties libman_1json__JsonSchema="https://json.schemastore.org/local.settings.json" properties_4launchsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
 </Project>
