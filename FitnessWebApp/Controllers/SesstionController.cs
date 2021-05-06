@@ -34,6 +34,7 @@ namespace FitnessWebApp.Controllers
         {
             var plan = await _context.TrainingPlans.FindAsync(Id);
             var user = await userManager.FindByIdAsync(UserId);
+            var days = new List<int>();
            
            
                 if (user == null)
@@ -61,13 +62,22 @@ namespace FitnessWebApp.Controllers
                             excer.AssistantMuscle = userExser[i].Excercise.AssistantMuscle;
                             excercises.Add(excer);
                     }
-                    var trainingPlan = new TrainingPlanViewModel() { planId = userExser[0].PlanId, muscleGroupId = userExser[0].MuscleGroupId, excercises = excercises, muscleGroupName = userExser[0].MuscleGroup.Name, planDiscription = userExser[0].TrainingPlan.Discription,day=userExser[0].Day};
+                    var userExserDays= await _context.ExcercisesInPlan.Where(p => p.PlanId == Id ).ToListAsync();
+                        for (int i=1;i<7;i++)
+                        {
+                            var day = userExserDays.Find(x => x.Day == i);
+                            if(day!=null)
+                            {
+                                days.Add(day.Day);
+                            }
+                        }
+                    var trainingPlan = new TrainingPlanViewModel() { planId = userExser[0].PlanId, muscleGroupId = userExser[0].MuscleGroupId, excercises = excercises, muscleGroupName = userExser[0].MuscleGroup.Name, planDiscription = userExser[0].TrainingPlan.Discription,day=userExser[0].Day,activeDays=days};
                         return Json(trainingPlan);
                     }
-                    return Forbid();
+                    return NoContent();
                 }
                 else
-                    return Forbid();
+                    return NoContent();
             }
             
             return NoContent();
