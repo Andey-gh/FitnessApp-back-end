@@ -94,7 +94,7 @@ namespace FitnessWebApp.Controllers
             {
                 return NoContent();
             }
-            var History = trHis.OrderBy(p => p.EndTime).Last();
+            var History = trHis.OrderBy(p => p.EndTime).First();
            
            
                 List<TrainingHistory> trainingHistory = new List<TrainingHistory>();
