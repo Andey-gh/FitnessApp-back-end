@@ -17,9 +17,9 @@ namespace FitnessWebApp.Models
         [Display(Name = "Название мышцы")]
         [MaxLength(50)]
         public string Name { get; set; }
-        [NotMapped]
+      
         [Display(Name = "Фото мышцы")]
        
-        public IFormFile Photo { get; set; }
+        public string Photo { get; set; }
     }
 }

@@ -34,6 +34,9 @@ namespace FitnessWebApp.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
 
+                    b.Property<string>("Photo")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
                     b.Property<int?>("TargetMuscleId")
                         .HasColumnType("int");
 
@@ -110,6 +113,9 @@ namespace FitnessWebApp.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
+
+                    b.Property<string>("Photo")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.HasKey("Id");
 

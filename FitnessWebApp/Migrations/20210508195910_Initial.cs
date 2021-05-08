@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace FitnessWebApp.Migrations
 {
-    public partial class ImageUpload : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -77,7 +77,7 @@ namespace FitnessWebApp.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(type: "varchar(50) CHARACTER SET utf8mb4", maxLength: 50, nullable: false),
-                    Photo = table.Column<byte[]>(type: "longblob", nullable: true)
+                    Photo = table.Column<string>(type: "longtext CHARACTER SET utf8mb4", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -95,6 +95,7 @@ namespace FitnessWebApp.Migrations
                     Difficulty = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<float>(type: "float", nullable: false),
                     Rating = table.Column<int>(type: "int", nullable: false),
+                    Category = table.Column<string>(type: "longtext CHARACTER SET utf8mb4", nullable: true),
                     Photo = table.Column<string>(type: "longtext CHARACTER SET utf8mb4", nullable: true)
                 },
                 constraints: table =>
@@ -237,7 +238,8 @@ namespace FitnessWebApp.Migrations
                     Name = table.Column<string>(type: "varchar(50) CHARACTER SET utf8mb4", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "longtext CHARACTER SET utf8mb4", nullable: true),
                     TargetMuscleId = table.Column<int>(type: "int", nullable: true),
-                    AssistantMuscleId = table.Column<int>(type: "int", nullable: true)
+                    AssistantMuscleId = table.Column<int>(type: "int", nullable: true),
+                    Photo = table.Column<string>(type: "longtext CHARACTER SET utf8mb4", nullable: true)
                 },
                 constraints: table =>
                 {

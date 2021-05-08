@@ -34,6 +34,7 @@ namespace FitnessWebApp
             services.AddDistributedMemoryCache();
             services.AddSession();
             services.AddDbContext<AppDbContext>(options => options.UseMySql(Configuration.GetConnectionString("Release")));
+            
             //настраиваем identity систему
             services.AddIdentity<User, IdentityRole>(opts =>
             {
