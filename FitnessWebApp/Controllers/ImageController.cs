@@ -41,7 +41,7 @@ namespace FitnessWebApp.Controllers
             if (extension.ToLower() != ".jpg" && extension.ToLower() != ".png") return StatusCode(400);
             fileName = $"{fileName}{extension}";
             string path = Path.Combine(@$"{wwwRootPath}/Images/{fileName}");
-            if (System.IO.File.Exists(path)) path += "_";
+            if (System.IO.File.Exists(path)) { fileName += "_"; path = Path.Combine(@$"{wwwRootPath}/Images/{fileName}"); }
             using (var fileStream = new FileStream(path, FileMode.Create))
             {
                 await ImageFile.CopyToAsync(fileStream);
