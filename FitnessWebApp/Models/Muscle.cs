@@ -19,6 +19,7 @@ namespace FitnessWebApp.Models
         public string Name { get; set; }
 
         [Display(Name = "Фото мышцы")]       
+
         public string Photo { get; set; }
     }
 }

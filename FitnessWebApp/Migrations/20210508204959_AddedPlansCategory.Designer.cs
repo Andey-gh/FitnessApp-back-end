@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FitnessWebApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20210427184943_ImageUpload")]
-    partial class ImageUpload
+    [Migration("20210508204959_AddedPlansCategory")]
+    partial class AddedPlansCategory
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -35,6 +35,9 @@ namespace FitnessWebApp.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
+
+                    b.Property<string>("Photo")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<int?>("TargetMuscleId")
                         .HasColumnType("int");
@@ -113,8 +116,8 @@ namespace FitnessWebApp.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
 
-                    b.Property<byte[]>("Photo")
-                        .HasColumnType("longblob");
+                    b.Property<string>("Photo")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.HasKey("Id");
 
@@ -211,6 +214,9 @@ namespace FitnessWebApp.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<int>("Difficulty")
                         .HasColumnType("int");

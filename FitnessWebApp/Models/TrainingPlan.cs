@@ -32,10 +32,10 @@ namespace FitnessWebApp.Models
         public int Rating { get; set; }
 
         [Display(Name = "Ссылка на фото плана")]
-        public string Category { get; set; }
-
-        [Display(Name = "Ссылка на фото плана")]
         public string Photo { get; set; }
+        
+        [Display(Name = "Категория")]
+        public string Category { get; set; }
 
         
     }
