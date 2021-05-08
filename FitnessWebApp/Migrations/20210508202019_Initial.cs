@@ -95,8 +95,8 @@ namespace FitnessWebApp.Migrations
                     Difficulty = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<float>(type: "float", nullable: false),
                     Rating = table.Column<int>(type: "int", nullable: false),
-                    Category = table.Column<string>(type: "longtext CHARACTER SET utf8mb4", nullable: true),
-                    Photo = table.Column<string>(type: "longtext CHARACTER SET utf8mb4", nullable: true)
+                    Photo = table.Column<string>(type: "longtext CHARACTER SET utf8mb4", nullable: true),
+                    Category = table.Column<string>(type: "longtext CHARACTER SET utf8mb4", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -290,11 +290,11 @@ namespace FitnessWebApp.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    SetsNumber = table.Column<int>(type: "int", nullable: false),
                     PlanId = table.Column<int>(type: "int", nullable: false),
                     ExcerciseId = table.Column<int>(type: "int", nullable: false),
                     Day = table.Column<int>(type: "int", nullable: false),
-                    MuscleGroupId = table.Column<int>(type: "int", nullable: false)
+                    MuscleGroupId = table.Column<int>(type: "int", nullable: false),
+                    SetsNumber = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
