@@ -171,7 +171,7 @@ namespace FitnessWebApp.Controllers
             return UnprocessableEntity();
         }
         [HttpPost]
-        [AllowAnonymous] //временно,для теста,убрать
+        [AllowAnonymous] 
         [Route("ChangeUserActivePlan/{PlanId}/{UserId}")]
         public async Task<IActionResult> ChangeActivePlan(int planId, string UserId)
         {
@@ -185,6 +185,9 @@ namespace FitnessWebApp.Controllers
             {
                 return NoContent();
             }
+            user.ActivePlanId = plan.Id;
+            await userManager.UpdateAsync(user);
+            await _context.SaveChangesAsync();
             return Ok();
 
                 
