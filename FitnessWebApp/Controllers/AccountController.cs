@@ -170,7 +170,28 @@ namespace FitnessWebApp.Controllers
             }
             return UnprocessableEntity();
         }
+        [HttpPost]
+        [AllowAnonymous] 
+        [Route("ChangeUserActivePlan/{PlanId}/{UserId}")]
+        public async Task<IActionResult> ChangeActivePlan(int planId, string UserId)
+        {
+            var user = await userManager.FindByIdAsync(UserId);
+            if(user==null)
+            {
+                return Unauthorized();
+            }
+            var plan = _context.TrainingPlans.Where(x => x.Id == planId).FirstOrDefault();
+            if(plan==null)
+            {
+                return NoContent();
+            }
+            user.ActivePlanId = plan.Id;
+            await userManager.UpdateAsync(user);
+            await _context.SaveChangesAsync();
+            return Ok();
 
+                
+        }
         [Route("Logout")]
         public async Task<IActionResult> Logout()
         {
