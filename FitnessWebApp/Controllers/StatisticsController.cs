@@ -1,6 +1,8 @@
 ﻿using FitnessWebApp.Domain;
+using FitnessWebApp.Managers;
 using FitnessWebApp.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -14,8 +16,10 @@ namespace FitnessWebApp.Controllers
     public class StatisticsController : Controller
     {
         private AppDbContext _context;
-        public StatisticsController(AppDbContext context) {
+        private UserManager<User> _userManager;
+        public StatisticsController(AppDbContext context, UserManager<User> userManager) {
             _context = context;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -52,6 +56,22 @@ namespace FitnessWebApp.Controllers
             return Json(objs);
 
         }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("Weight")]
+        public async Task<IActionResult> WeightChange(WeightHistory history){
+            if (!ModelState.IsValid)
+            {
+                return UnprocessableEntity();
+            }
+            WeightHistoryManager manager  = new WeightHistoryManager(_context,_userManager);
+            bool result = await manager.AddChange(history);
+            if (!result) return StatusCode(400);
+            return Ok();
+        }
+
+
 
 
     }

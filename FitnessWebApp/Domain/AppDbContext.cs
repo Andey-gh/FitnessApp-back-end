@@ -11,10 +11,10 @@ using System.Threading.Tasks;
 
 namespace FitnessWebApp.Domain
 {
-    public class AppDbContext: IdentityDbContext<User>
+    public class AppDbContext : IdentityDbContext<User>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-       
+
         public DbSet<TrainingPlan> TrainingPlans { get; set; }
         public DbSet<TrainingHistory> TrainingHistories { get; set; }
         public DbSet<Excercise> Excercises { get; set; }
@@ -24,6 +24,7 @@ namespace FitnessWebApp.Domain
 
         public DbSet<HealthProblem> HealthProblems { get; set; }
         public DbSet<Muscle> Muscles { get; set; }
+        public DbSet<WeightHistory> WeightHistories { get;set;}
 
     }
     
