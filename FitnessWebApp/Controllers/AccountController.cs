@@ -16,6 +16,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using FitnessWebApp.Domain;
+using FitnessWebApp.Managers;
 
 namespace FitnessWebApp.Controllers
 {
@@ -26,13 +27,13 @@ namespace FitnessWebApp.Controllers
     public class AccountController:Controller
     {
         
-        private readonly UserManager<User> userManager;
+        private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> signInManager;
         private readonly AppDbContext _context;
 
-        public AccountController(UserManager<User> userMgr, SignInManager<User> signinMgr, AppDbContext context)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signinMgr, AppDbContext context)
         {
-            userManager = userMgr;
+            _userManager = userManager;
             signInManager = signinMgr;
             _context = context;
            
@@ -51,7 +52,7 @@ namespace FitnessWebApp.Controllers
         public async Task<IActionResult> GetMetrics(string id)
         {
             
-            var user = await userManager.FindByIdAsync(id);
+            var user = await _userManager.FindByIdAsync(id);
             if (user != null)
             {
                 var user_health = _context.HealthProblems.Where(x => x.UserId == id).ToList();
@@ -77,11 +78,13 @@ namespace FitnessWebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await userManager.FindByIdAsync(id);
+                var user = await _userManager.FindByIdAsync(id);
                 if (user != null)
                 {
                     user.Name = UserMetrics.Name;
-                    user.Weight = UserMetrics.MetricWeight;
+                    WeightHistory history = new WeightHistory(id,UserMetrics.MetricWeight,DateTime.Now.Date);
+                    WeightHistoryManager manager = new WeightHistoryManager(_context, _userManager);
+                    await manager.AddChange(history);
                     user.Age = UserMetrics.MetricAge;
                     user.Gender = UserMetrics.MetricGender;
                     user.Goal = UserMetrics.MetricGoal;
@@ -90,7 +93,7 @@ namespace FitnessWebApp.Controllers
                     {
                         UserMetrics.healthProblems[i].UserId = id;
                     }
-                    await userManager.UpdateAsync(user);
+                    await _userManager.UpdateAsync(user);
                     await _context.SaveChangesAsync();
                     var user_health = _context.HealthProblems.Where(x => x.UserId == id).ToList();
                     _context.HealthProblems.RemoveRange(user_health);
@@ -113,7 +116,7 @@ namespace FitnessWebApp.Controllers
             
             if (ModelState.IsValid)
             {
-                User user = await userManager.FindByNameAsync(model.UserLogin);
+                User user = await _userManager.FindByNameAsync(model.UserLogin);
                 if (user != null)
                 {
                     await signInManager.SignOutAsync();
@@ -140,14 +143,16 @@ namespace FitnessWebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await userManager.FindByIdAsync(id);
+                var user = await _userManager.FindByIdAsync(id);
                 
                 if (user != null)
                 {
                    
                     user.Age = model.MetricAge;
                     user.Height = model.MetricHeight;
-                    user.Weight = model.MetricWeight;
+                    WeightHistory history = new WeightHistory(id, model.MetricWeight, DateTime.Now.Date);
+                    WeightHistoryManager manager = new WeightHistoryManager(_context, _userManager);
+                    await manager.AddChange(history);
                     user.Goal = model.MetricGoal;
                     user.MaxPushUps = model.MetricPushUps;
                     user.MaxPullUps = model.MetricPullUps;
@@ -163,7 +168,7 @@ namespace FitnessWebApp.Controllers
                     }
                     
 
-                    await userManager.UpdateAsync(user);
+                    await _userManager.UpdateAsync(user);
                     return Ok();
                 }
                 return Unauthorized();
@@ -175,7 +180,7 @@ namespace FitnessWebApp.Controllers
         [Route("ChangeUserActivePlan/{PlanId}/{UserId}")]
         public async Task<IActionResult> ChangeActivePlan(int planId, string UserId)
         {
-            var user = await userManager.FindByIdAsync(UserId);
+            var user = await _userManager.FindByIdAsync(UserId);
             if(user==null)
             {
                 return Unauthorized();
@@ -186,7 +191,7 @@ namespace FitnessWebApp.Controllers
                 return NoContent();
             }
             user.ActivePlanId = plan.Id;
-            await userManager.UpdateAsync(user);
+            await _userManager.UpdateAsync(user);
             await _context.SaveChangesAsync();
             return Ok();
 
