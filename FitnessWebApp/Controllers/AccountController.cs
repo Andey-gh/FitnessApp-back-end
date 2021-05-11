@@ -82,7 +82,7 @@ namespace FitnessWebApp.Controllers
                 if (user != null)
                 {
                     user.Name = UserMetrics.Name;
-                    WeightHistory history = new WeightHistory(id,UserMetrics.MetricWeight,DateTime.Now);
+                    WeightHistory history = new WeightHistory(id,UserMetrics.MetricWeight,DateTime.Now.Date);
                     WeightHistoryManager manager = new WeightHistoryManager(_context, _userManager);
                     await manager.AddChange(history);
                     user.Age = UserMetrics.MetricAge;
@@ -150,7 +150,7 @@ namespace FitnessWebApp.Controllers
                    
                     user.Age = model.MetricAge;
                     user.Height = model.MetricHeight;
-                    WeightHistory history = new WeightHistory(id, model.MetricWeight, DateTime.Now);
+                    WeightHistory history = new WeightHistory(id, model.MetricWeight, DateTime.Now.Date);
                     WeightHistoryManager manager = new WeightHistoryManager(_context, _userManager);
                     await manager.AddChange(history);
                     user.Goal = model.MetricGoal;

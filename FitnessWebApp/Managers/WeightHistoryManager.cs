@@ -26,7 +26,7 @@ namespace FitnessWebApp.Managers
                 WeightHistory old;
                 user.Weight = history.Weight;
                 await _userManager.UpdateAsync(user);
-                try { old = _context.WeightHistories.First(x => x.UserId == history.UserId && x.Date.Date == history.Date.Date); } catch { old = null;}
+                try { old = _context.WeightHistories.First(x => x.UserId == history.UserId && x.Date == history.Date); } catch { old = null;}
                 if (old!=null) {
                     old.Weight = history.Weight;
                      _context.WeightHistories.Update(old);

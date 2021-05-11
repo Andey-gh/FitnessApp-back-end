@@ -65,7 +65,8 @@ namespace FitnessWebApp.Controllers
             {
                 return UnprocessableEntity();
             }
-            WeightHistoryManager manager  = new WeightHistoryManager(_context,_userManager);
+            history.Date = DateTime.Now.Date;
+           WeightHistoryManager manager  = new WeightHistoryManager(_context,_userManager);
             bool result = await manager.AddChange(history);
             if (!result) return StatusCode(400);
             return Ok();
