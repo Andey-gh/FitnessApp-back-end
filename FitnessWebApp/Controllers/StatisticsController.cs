@@ -22,10 +22,10 @@ namespace FitnessWebApp.Controllers
             _userManager = userManager;
         }
 
-        [HttpGet]
+        [HttpPost]
         [AllowAnonymous]
         [Route("Tonnage")]
-        public async Task<IActionResult> GetTonnage(Statistics stats)
+        public async Task<IActionResult> PostTonnage(Statistics stats)
         {
             if (!ModelState.IsValid)
             {
@@ -33,7 +33,7 @@ namespace FitnessWebApp.Controllers
             }
             string[] labels = new string[stats.Period];
             float[] tonnages = new float[stats.Period];
-            DateTime now = DateTime.Now;
+            DateTime now = DateTime.Now.Date;
             for (int i = stats.Period-1; i >= 0; i--)labels[stats.Period-i-1] =(now.AddDays(-i)).Date.ToString("dd.MM");
 
             if (stats.Step == "Day")
@@ -41,8 +41,9 @@ namespace FitnessWebApp.Controllers
                 var selectedExcercises = _context.TrainingHistories.Where(ex => (ex.UserId == stats.UserId)).ToList();
                 foreach (TrainingHistory ex in selectedExcercises)
                 {
-                    TimeSpan difference = now.Date - ex.StartTime.Date;
-                    if (difference.Days < stats.Period){
+                    TimeSpan difference = now - ex.StartTime.Date;
+                    if (difference.Days < stats.Period && difference.Days >= 0)
+                    {
                         int pos = stats.Period - difference.Days-1;
                         tonnages[pos] += ex.TotalWeight * ex.Quantity;
                     }
@@ -72,10 +73,10 @@ namespace FitnessWebApp.Controllers
             return Ok();
         }
 
-        [HttpGet]
+        [HttpPost]
         [AllowAnonymous]
-        [Route("Weight")]
-        public async Task<IActionResult> WeightChange()
+        [Route("GetWeight")]
+        public async Task<IActionResult> PostWeight()
         {
             
             return Ok();
