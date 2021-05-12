@@ -42,9 +42,8 @@ namespace FitnessWebApp.Controllers
 
             if (plan!= null) 
             {
-                var userplan = await _context.PlansOfUsers.Where(p => p.UserId == user.Id&&p.PlanId==Id).ToListAsync();
-                if (userplan.Count!=0)
-                {
+                //var userplan = await _context.PlansOfUsers.Where(p => p.UserId == user.Id&&p.PlanId==Id).ToListAsync();
+                
                     var userExser= await _context.ExcercisesInPlan.Include(c => c.Excercise).Include(c => c.Excercise.AssistantMuscle).Include(c => c.Excercise.TargetMuscle).Where(p => p.PlanId == Id && p.Day == Day).Include(c => c.MuscleGroup).ToListAsync();
                     if(userExser.Count!=0)
                     { 
@@ -75,9 +74,7 @@ namespace FitnessWebApp.Controllers
                         return Json(trainingPlan);
                     }
                     return NoContent();
-                }
-                else
-                    return NoContent();
+                
             }
             
             return NoContent();
@@ -139,17 +136,38 @@ namespace FitnessWebApp.Controllers
             
             var user = await userManager.FindByIdAsync(UserId);
             
-            {
+         
                 if (user == null)
                     return Unauthorized();
+            
+            var trainingHistory = await _context.TrainingHistories.Include(c=>c.Excercise).Include(x=>x.Excercise.AssistantMuscle).Include(x => x.Excercise.TargetMuscle).Include(x=>x.muscleGroup).Where(p => p.UserId == user.Id ).Select(x => new { x.Excercise, x.EndTime, x.Quantity, x.muscleGroup, x.TotalWeight,x.StartTime }).ToListAsync(); //.Select(x=>new {x.Excercise,x.EndTime,x.Quantity,x.muscleGroup,x.TotalWeight })
+            List<TrainingHistoryViewModel> trainingHistoryViews = new List<TrainingHistoryViewModel>();
+            for (int i = 0; i < trainingHistory.Count; i++)
+            {
+                List<TrainingHistoryExscerciseViewModel> excercises = new List<TrainingHistoryExscerciseViewModel>();
+                var Date = trainingHistory[i].EndTime;
+                while (trainingHistory[i].EndTime.DayOfYear == Date.DayOfYear)
+                {
+                    
+                    excercises.Add(new TrainingHistoryExscerciseViewModel() {exserciseId=trainingHistory[i].Excercise.Id,exserciseName=trainingHistory[i].Excercise.Name,quantity=trainingHistory[i].Quantity,weight=trainingHistory[i].TotalWeight,startTime=trainingHistory[i].StartTime,endTime=trainingHistory[i].EndTime });
+                    i++;
+                    if(i>=trainingHistory.Count)
+                    {
+                        break;
+                    }
+                }
+                
+                trainingHistoryViews.Add( new TrainingHistoryViewModel() {date=Date,excercises=excercises });
+                if(i>=trainingHistory.Count)
+                {
+                    break;
+                }
             }
-            var trainingHistory = await _context.TrainingHistories.Include(c=>c.Excercise).Include(x=>x.muscleGroup).Where(p => p.UserId == user.Id ).Select(x=>new {x.Excercise,x.EndTime,x.Quantity,x.muscleGroup,x.TotalWeight }).ToListAsync();
 
-
-            if (trainingHistory != null)
+            if (trainingHistoryViews != null)
             {
 
-                    return Json(trainingHistory);
+                    return Json(trainingHistoryViews);
                 
             }
 

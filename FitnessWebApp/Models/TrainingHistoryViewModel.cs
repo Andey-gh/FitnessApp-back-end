@@ -7,6 +7,8 @@ namespace FitnessWebApp.Models
 {
     public class TrainingHistoryViewModel
     {
+        public DateTime date { get; set; }
 
+        public List<TrainingHistoryExscerciseViewModel> excercises { get; set; }
     }
 }
