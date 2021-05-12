@@ -89,10 +89,37 @@ namespace FitnessWebApp.Controllers
         [HttpPost]
         [AllowAnonymous]
         [Route("GetWeight")]
-        public async Task<IActionResult> PostWeight()
+        public async Task<IActionResult> PostWeight(Statistics stats)
         {
-            
-            return Ok();
+            if (!ModelState.IsValid)
+            {
+                return UnprocessableEntity();
+            }
+            string[] labels = new string[stats.Period];
+            float[] weights = new float[stats.Period];
+            DateTime now = DateTime.Now.Date;
+
+            if (stats.Step == "Day")
+            {
+                for (int i = stats.Period - 1; i >= 0; i--) labels[stats.Period - i - 1] = (now.AddDays(-i)).Date.ToString("dd.MM");
+                var selectedExcercises = _context.WeightHistories.Where(ex => (ex.UserId == stats.UserId)).ToList();
+                foreach (WeightHistory ex in selectedExcercises)
+                {
+                    TimeSpan difference = now - ex.Date;
+                    if (difference.Days < stats.Period && difference.Days >= 0)
+                    {
+                        int pos = stats.Period - difference.Days - 1;
+                        weights[pos] = ex.Weight;
+                    }
+                }
+            }
+            else
+            {
+                return StatusCode(400);
+            }
+            List<object> objs = new List<object>();
+            for (int i = 0; i < stats.Period; i++) if(weights[i]>0) objs.Add( new { X = i, Label = labels[i], Value = weights[i] });
+            return Json(objs);
         }
 
 
