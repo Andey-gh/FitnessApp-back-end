@@ -72,7 +72,14 @@ namespace FitnessWebApp.Controllers
             return Ok();
         }
 
-
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("Weight")]
+        public async Task<IActionResult> WeightChange()
+        {
+            
+            return Ok();
+        }
 
 
     }
