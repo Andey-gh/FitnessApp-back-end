@@ -34,10 +34,10 @@ namespace FitnessWebApp.Controllers
             string[] labels = new string[stats.Period];
             float[] tonnages = new float[stats.Period];
             DateTime now = DateTime.Now.Date;
-            for (int i = stats.Period-1; i >= 0; i--)labels[stats.Period-i-1] =(now.AddDays(-i)).Date.ToString("dd.MM");
 
             if (stats.Step == "Day")
             {
+                for (int i = stats.Period - 1; i >= 0; i--) labels[stats.Period - i - 1] = (now.AddDays(-i)).Date.ToString("dd.MM");
                 var selectedExcercises = _context.TrainingHistories.Where(ex => (ex.UserId == stats.UserId)).ToList();
                 foreach (TrainingHistory ex in selectedExcercises)
                 {
@@ -46,6 +46,19 @@ namespace FitnessWebApp.Controllers
                     {
                         int pos = stats.Period - difference.Days-1;
                         tonnages[pos] += ex.TotalWeight * ex.Quantity;
+                    }
+                }
+            }else if (stats.Step == "Week") {
+                var selectedExcercises = _context.TrainingHistories.Where(ex => (ex.UserId == stats.UserId)).ToList();
+                for (int i=0;i< stats.Period;i++) {
+                    DateTime startOfWeek = now.AddDays(-(now.DayOfWeek - DayOfWeek.Monday)-7*i);
+                    DateTime endOfWeek = startOfWeek.AddDays(6);
+                    labels[stats.Period - i - 1] = $"{startOfWeek.ToString("dd.MM")}-{endOfWeek.ToString("dd.MM")}";
+                    foreach (TrainingHistory ex in selectedExcercises) {
+                        if (ex.StartTime > startOfWeek && ex.StartTime < endOfWeek)
+                        {
+                            tonnages[stats.Period - i - 1] += ex.TotalWeight * ex.Quantity;
+                        }
                     }
                 }
             }
