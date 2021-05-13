@@ -84,7 +84,13 @@ namespace FitnessWebApp
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute("/", "{controller=Home}/{action=Index}");
+                endpoints.MapControllerRoute(name: "default",pattern: "{controller=Home}/{action=Index}");
+                endpoints.MapControllerRoute(name: "login",pattern: "login/",defaults: new { controller = "Home", action = "Index" });
+                endpoints.MapControllerRoute(name: "pre-session", pattern: "pre-session/", defaults: new { controller = "Home", action = "Index" });
+                endpoints.MapControllerRoute(name: "progress", pattern: "progress/", defaults: new { controller = "Home", action = "Index" });
+                endpoints.MapControllerRoute(name: "my-training-plan", pattern: "my-training-plan/", defaults: new { controller = "Home", action = "Index" });
+                endpoints.MapControllerRoute(name: "training-history", pattern: "training-history/", defaults: new { controller = "Home", action = "Index" });
+                endpoints.MapControllerRoute(name: "settings", pattern: "settings/", defaults: new { controller = "Home", action = "Index" });
             });
         }
     }

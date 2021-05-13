@@ -59,6 +59,7 @@ namespace FitnessWebApp.Controllers
                             excer.Description = userExser[i].Excercise.Description;
                             excer.TargetMuscle = userExser[i].Excercise.TargetMuscle;
                             excer.AssistantMuscle = userExser[i].Excercise.AssistantMuscle;
+                            excer.Photo = userExser[i].Excercise.Photo;
                             excercises.Add(excer);
                     }
                     var userExserDays= await _context.ExcercisesInPlan.Where(p => p.PlanId == Id ).ToListAsync();
