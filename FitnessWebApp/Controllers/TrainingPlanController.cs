@@ -79,32 +79,12 @@ namespace FitnessWebApp.Controllers
         [Route("TrainingPlansByCategory/{category}")]
         public async Task<ActionResult<ICollection<TrainingPlan>>> GetPlansByCategory(string category)
         {
-            //List<TrainingPlanByCategoryViewModel> trainingPlanByCategory=new List<TrainingPlanByCategoryViewModel>();
-           // List<ExscercisePlanViewModel> excerciseInPlan;
             var plans=await _context.TrainingPlans.Where(x => x.Category == category).ToListAsync();
             if(plans.Count==0)
             {
                 return NoContent();
             }
-            /*for(int i=0;i<plans.Count;i++)
-            {
-                //excerciseInPlan = new List<ExscercisePlanViewModel>();
-               // var exscercises = await _context.ExcercisesInPlan.Include(x=>x.Excercise).Include(x => x.Excercise.AssistantMuscle).Include(x => x.Excercise.TargetMuscle).Where(x => x.PlanId == plans[i].Id).ToListAsync();
-                /*if(exscercises.Count==0)
-                {
-                    return NoContent();
-                }*/
-                /*foreach(var a in exscercises)
-                {
-                    ExscercisePlanViewModel exscercisePlanViewModel = new ExscercisePlanViewModel() { Id = a.Id, Name = a.Excercise.Name, Description = a.Excercise.Description, setsNumber = a.SetsNumber, TargetMuscle = a.Excercise.TargetMuscle, TargetMuscleId = a.Excercise.TargetMuscleId, AssistantMuscle = a.Excercise.AssistantMuscle, AssistantMuscleId = a.Excercise.AssistantMuscleId };
-                    excerciseInPlan.Add(exscercisePlanViewModel);
-                }*/
-                
-                
-                /*TrainingPlanByCategoryViewModel PlanByCategory = new TrainingPlanByCategoryViewModel() {planId=plans[i].Id,category=plans[i].Category};
-                trainingPlanByCategory.Add(PlanByCategory);
-            }*/
-            
+   
             return Json(plans);
         }
         [HttpGet("TrainingPlans/{id}")]

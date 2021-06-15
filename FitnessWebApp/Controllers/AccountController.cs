@@ -21,12 +21,12 @@ using FitnessWebApp.Managers;
 namespace FitnessWebApp.Controllers
 {
     [Route("/api")]
-    
+
     [ApiController]
 
-    public class AccountController:Controller
+    public class AccountController : Controller
     {
-        
+
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> signInManager;
         private readonly AppDbContext _context;
@@ -36,7 +36,7 @@ namespace FitnessWebApp.Controllers
             _userManager = userManager;
             signInManager = signinMgr;
             _context = context;
-           
+
         }
         [AllowAnonymous]
         public IActionResult Login(string returnUrl)
@@ -51,22 +51,23 @@ namespace FitnessWebApp.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetMetrics(string id)
         {
-            
+
             var user = await _userManager.FindByIdAsync(id);
+
             if (user != null)
             {
                 var user_health = _context.HealthProblems.Where(x => x.UserId == id).ToList();
                 List<string> health_problems = new List<string>();
                 if (user_health != null)
                 {
-                    
+
                     for (int i = 0; i < user_health.Count; i++)
                     {
                         health_problems.Add(user_health[i].Problem);
                     }
                 }
-                var user_metrics = new UserProfileViewModel() { MetricAge = user.Age, MetricGoal = user.Goal, HealthProblems = health_problems, MetricHeight = user.Height, MetricPullUps = user.MaxPullUps, MetricPushUps = user.MaxPushUps, MetricWeight = user.Weight, Name = user.Name ,MetricGender=user.Gender};
-              
+                var user_metrics = new UserProfileViewModel() { MetricAge = user.Age, MetricGoal = user.Goal, HealthProblems = health_problems, MetricHeight = user.Height, MetricPullUps = user.MaxPullUps, MetricPushUps = user.MaxPushUps, MetricWeight = user.Weight, Name = user.Name, MetricGender = user.Gender };
+
                 return Json(user_metrics);
             }
             return Unauthorized();
@@ -74,7 +75,7 @@ namespace FitnessWebApp.Controllers
         [HttpPatch]
         [Route("UserMetrics/{id}")]
         [AllowAnonymous]
-        public async Task<IActionResult> UpdateMetrics(string id,UserMetricsUpdateModel UserMetrics)
+        public async Task<IActionResult> UpdateMetrics(string id, UserMetricsUpdateModel UserMetrics)
         {
             if (ModelState.IsValid)
             {
@@ -82,14 +83,14 @@ namespace FitnessWebApp.Controllers
                 if (user != null)
                 {
                     user.Name = UserMetrics.Name;
-                    WeightHistory history = new WeightHistory(id,UserMetrics.MetricWeight,DateTime.Now.Date);
+                    WeightHistory history = new WeightHistory(id, UserMetrics.MetricWeight, DateTime.Now.Date);
                     WeightHistoryManager manager = new WeightHistoryManager(_context, _userManager);
                     await manager.AddChange(history);
                     user.Age = UserMetrics.MetricAge;
                     user.Gender = UserMetrics.MetricGender;
                     user.Goal = UserMetrics.MetricGoal;
                     user.Height = UserMetrics.MetricHeight;
-                    for(int i=0;i<UserMetrics.healthProblems.Count;i++)
+                    for (int i = 0; i < UserMetrics.healthProblems.Count; i++)
                     {
                         UserMetrics.healthProblems[i].UserId = id;
                     }
@@ -98,7 +99,7 @@ namespace FitnessWebApp.Controllers
                     var user_health = _context.HealthProblems.Where(x => x.UserId == id).ToList();
                     _context.HealthProblems.RemoveRange(user_health);
                     await _context.SaveChangesAsync();
-                   await _context.HealthProblems.AddRangeAsync(UserMetrics.healthProblems);
+                    await _context.HealthProblems.AddRangeAsync(UserMetrics.healthProblems);
                     await _context.SaveChangesAsync();
 
                     return Ok();
@@ -113,7 +114,7 @@ namespace FitnessWebApp.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl)
         {
-            
+
             if (ModelState.IsValid)
             {
                 User user = await _userManager.FindByNameAsync(model.UserLogin);
@@ -123,11 +124,11 @@ namespace FitnessWebApp.Controllers
                     Microsoft.AspNetCore.Identity.SignInResult result = await signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, true);
                     if (result.Succeeded)
                     {
-                        UserViewModel user_model = new UserViewModel(user.Id,user.Age,user.Name,user.Weight,user.Height,user.Gender,user.Email,user.IsMetrics,user.ActivePlanId);
-                        
+                        UserViewModel user_model = new UserViewModel(user.Id, user.Age, user.Name, user.Weight, user.Height, user.Gender, user.Email, user.IsMetrics, user.ActivePlanId);
+
 
                         return Json(user_model);
-                        
+
                     }
                 }
                 return Unauthorized();
@@ -139,15 +140,15 @@ namespace FitnessWebApp.Controllers
         [HttpPost]
         [AllowAnonymous] //временно,для теста,убрать
         [Route("sendMetrics/{id}")]
-        public async Task<IActionResult> PostMetrics(MetricsModel model,string id)
+        public async Task<IActionResult> PostMetrics(MetricsModel model, string id)
         {
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByIdAsync(id);
-                
+
                 if (user != null)
                 {
-                   
+
                     user.Age = model.MetricAge;
                     user.Height = model.MetricHeight;
                     WeightHistory history = new WeightHistory(id, model.MetricWeight, DateTime.Now.Date);
@@ -157,16 +158,16 @@ namespace FitnessWebApp.Controllers
                     user.MaxPushUps = model.MetricPushUps;
                     user.MaxPullUps = model.MetricPullUps;
                     user.IsMetrics = true;
-                    
+                    char? w = null;
 
-                   for(int i=0;i<model.MetricHealth.Count;i++)
+                    for (int i = 0; i < model.MetricHealth.Count; i++)
                     {
                         HealthProblem problem = new HealthProblem(user.Id, model.MetricHealth[i].Problem);
-                       
+
                         await _context.HealthProblems.AddAsync(problem);
                         await _context.SaveChangesAsync();
                     }
-                    
+
 
                     await _userManager.UpdateAsync(user);
                     return Ok();
@@ -176,17 +177,17 @@ namespace FitnessWebApp.Controllers
             return UnprocessableEntity();
         }
         [HttpPost]
-        [AllowAnonymous] 
+        [AllowAnonymous]
         [Route("ChangeUserActivePlan/{PlanId}/{UserId}")]
         public async Task<IActionResult> ChangeActivePlan(int planId, string UserId)
         {
             var user = await _userManager.FindByIdAsync(UserId);
-            if(user==null)
+            if (user == null)
             {
                 return Unauthorized();
             }
             var plan = _context.TrainingPlans.Where(x => x.Id == planId).FirstOrDefault();
-            if(plan==null)
+            if (plan == null)
             {
                 return NoContent();
             }
@@ -195,16 +196,16 @@ namespace FitnessWebApp.Controllers
             await _context.SaveChangesAsync();
             return Ok();
 
-                
+
         }
         [Route("Logout")]
         public async Task<IActionResult> Logout()
         {
             await signInManager.SignOutAsync();
-           
-       
+
+
             return RedirectToAction("api", "login");
-           
+
         }
 
 

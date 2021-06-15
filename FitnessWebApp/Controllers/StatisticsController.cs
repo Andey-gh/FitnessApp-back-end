@@ -17,7 +17,8 @@ namespace FitnessWebApp.Controllers
     {
         private AppDbContext _context;
         private UserManager<User> _userManager;
-        public StatisticsController(AppDbContext context, UserManager<User> userManager) {
+        public StatisticsController(AppDbContext context, UserManager<User> userManager) 
+        {
             _context = context;
             _userManager = userManager;
         }

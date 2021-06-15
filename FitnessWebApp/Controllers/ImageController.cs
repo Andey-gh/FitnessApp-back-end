@@ -33,24 +33,24 @@ namespace FitnessWebApp.Controllers
         [HttpPost]
         [AllowAnonymous]
         [Route("Image")]
-        public async Task<IActionResult> AddImage([FromForm(Name = "file")] IFormFile ImageFile)
+        public async Task<IActionResult> AddImage([FromForm(Name = "file")] IFormFile imageFile)
         {
             string wwwRootPath = _environment.WebRootPath;
-            string fileName = Path.GetFileNameWithoutExtension(ImageFile.FileName);
-            string extension = Path.GetExtension(ImageFile.FileName);
+            string fileName = Path.GetFileNameWithoutExtension(imageFile.FileName);
+            string extension = Path.GetExtension(imageFile.FileName);
             if (extension.ToLower() != ".jpg" && extension.ToLower() != ".png") return StatusCode(400);
             fileName = $"{fileName}{extension}";
             string path = Path.Combine(@$"{wwwRootPath}/Images/{fileName}");
             if (System.IO.File.Exists(path)) { fileName += "_"; path = Path.Combine(@$"{wwwRootPath}/Images/{fileName}"); }
             using (var fileStream = new FileStream(path, FileMode.Create))
             {
-                await ImageFile.CopyToAsync(fileStream);
+                await imageFile.CopyToAsync(fileStream);
             }
             string url = $"{_configuration.GetValue<string>("Domain")}Images/{fileName}";
             var responce = new { Name = fileName, URL = url };
             return Json(responce);
         }
-     
+
 
     }
 }

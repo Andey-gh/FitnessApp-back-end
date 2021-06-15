@@ -15,12 +15,11 @@ namespace FitnessWebApp.Controllers
     [ApiController]
     public class ExcerciseController : Controller
     {
-        
+
         private AppDbContext _context;
 
         public ExcerciseController(AppDbContext context)
         {
-
             _context = context;
         }
 

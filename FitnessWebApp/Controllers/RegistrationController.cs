@@ -80,7 +80,6 @@ namespace FitnessWebApp.Controllers
             var result = await _userManager.ConfirmEmailAsync(user, code);
             if (result.Succeeded)
             {
-               // UserViewModel user_model = new UserViewModel(user.Id, user.Age, user.Name, user.Weight, user.Height, user.Gender, user.Email);
                 PlansOfUser plansOfUser = new PlansOfUser();
                 plansOfUser.PlanId = 1;
                 plansOfUser.UserId = user.Id;
@@ -88,7 +87,6 @@ namespace FitnessWebApp.Controllers
                 await _context.SaveChangesAsync();
                 await _signInManager.SignOutAsync();
                 return Redirect("/login");
-                //return Json(user_model);
             }
             else return StatusCode(501);
         }

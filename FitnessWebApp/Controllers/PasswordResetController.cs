@@ -42,7 +42,7 @@ namespace FitnessWebApp.Controllers
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var callbackUrl = Url.Action("ResetPassword", "PasswordReset", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
                 EmailService emailService = new EmailService(_configuration);
-                await emailService.SendEmailAsync(model.Email, "Reset Password",$"Для сброса пароля введите код: {code}");
+                await emailService.SendEmailAsync(model.Email, "Reset Password", $"Для сброса пароля введите код: {code}");
                 return Ok("Mail with code was sent");
             }
             return UnprocessableEntity();

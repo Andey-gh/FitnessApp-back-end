@@ -22,19 +22,20 @@ namespace FitnessWebApp
     {
         public Startup(IConfiguration ñonfiguration)
         {
-            Configuration = ñonfiguration;
+            _ñonfiguration = ñonfiguration;
         }
+        private IConfiguration _ñonfiguration;
+        public IConfiguration Configuration { get => _ñonfiguration; }
 
-        public IConfiguration Configuration { get;}
 
 
-
-            // This method gets called by the runtime. Use this method to add services to the container.
-            public void ConfigureServices(IServiceCollection services){
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
             services.AddDistributedMemoryCache();
             services.AddSession();
             services.AddDbContext<AppDbContext>(options => options.UseMySql(Configuration.GetConnectionString("Release")));
-            
+
             //íàñòðàèâàåì identity ñèñòåìó
             services.AddIdentity<User, IdentityRole>(opts =>
             {
@@ -56,12 +57,12 @@ namespace FitnessWebApp
                 options.LogoutPath = "/api/Logout";
                 options.SlidingExpiration = true;
                 options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
-                options.ExpireTimeSpan= TimeSpan.FromHours(24);
+                options.ExpireTimeSpan = TimeSpan.FromHours(24);
 
             });
-           
+
             services.AddControllersWithViews();
-          
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -77,20 +78,24 @@ namespace FitnessWebApp
                .AllowAnyHeader()
                .SetIsOriginAllowed(origin => true) // allow any origin
                .AllowCredentials()); // allow credentials
-           
+
             app.UseCookiePolicy();
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute(name: "default",pattern: "{controller=Home}/{action=Index}");
-                endpoints.MapControllerRoute(name: "login",pattern: "login/",defaults: new { controller = "Home", action = "Index" });
+                endpoints.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}");
+                endpoints.MapControllerRoute(name: "login", pattern: "login/", defaults: new { controller = "Home", action = "Index" });
                 endpoints.MapControllerRoute(name: "pre-session", pattern: "pre-session/", defaults: new { controller = "Home", action = "Index" });
                 endpoints.MapControllerRoute(name: "progress", pattern: "progress/", defaults: new { controller = "Home", action = "Index" });
                 endpoints.MapControllerRoute(name: "my-training-plan", pattern: "my-training-plan/", defaults: new { controller = "Home", action = "Index" });
                 endpoints.MapControllerRoute(name: "training-history", pattern: "training-history/", defaults: new { controller = "Home", action = "Index" });
                 endpoints.MapControllerRoute(name: "settings", pattern: "settings/", defaults: new { controller = "Home", action = "Index" });
+
+                endpoints.MapControllerRoute(name: "register", pattern: "register/", defaults: new { controller = "Home", action = "Index" });
+                endpoints.MapControllerRoute(name: "session", pattern: "session/", defaults: new { controller = "Home", action = "Index" });
+                endpoints.MapControllerRoute(name: "SessionResults", pattern: "SessionResults/", defaults: new { controller = "Home", action = "Index" });
             });
         }
     }

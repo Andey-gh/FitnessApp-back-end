@@ -13,105 +13,99 @@ using Microsoft.AspNetCore.Identity;
 
 namespace FitnessWebApp.Controllers
 {
-    
+
     [Route("/api")]
     [ApiController]
-    public class SesstionController:Controller
+    public class SesstionController : Controller
     {
         private AppDbContext _context;
-        private readonly UserManager<User> userManager;
+        private readonly UserManager<User> _userManager;
 
-        public SesstionController(AppDbContext context, UserManager<User> userMgr)
+        public SesstionController(AppDbContext context, UserManager<User> userManager)
         {
-
             _context = context;
-            userManager = userMgr;
+            _userManager = userManager;
         }
 
         [HttpGet("getPlan/{id}/{day}/{UserId}")]
-        
-        public async Task<ActionResult<ICollection<ExcerciseInPlan>>> GetPreSsestion(int Id,int Day,string UserId)
-        {
-            var plan = await _context.TrainingPlans.FindAsync(Id);
-            var user = await userManager.FindByIdAsync(UserId);
-            var days = new List<int>();
-           
-           
-                if (user == null)
-                    return Unauthorized();
 
-            if (plan!= null) 
+        public async Task<ActionResult<ICollection<ExcerciseInPlan>>> GetPreSsestion(int id, int day, string userId)
+        {
+            var plan = await _context.TrainingPlans.FindAsync(id);
+            var user = await _userManager.FindByIdAsync(userId);
+            var days = new List<int>();
+
+
+            if (user == null)
+                return Unauthorized();
+
+            if (plan != null)
             {
-                //var userplan = await _context.PlansOfUsers.Where(p => p.UserId == user.Id&&p.PlanId==Id).ToListAsync();
-                
-                    var userExser= await _context.ExcercisesInPlan.Include(c => c.Excercise).Include(c => c.Excercise.AssistantMuscle).Include(c => c.Excercise.TargetMuscle).Where(p => p.PlanId == Id && p.Day == Day).Include(c => c.MuscleGroup).ToListAsync();
-                    if(userExser.Count!=0)
-                    { 
+
+                var userExser = await _context.ExcercisesInPlan.Include(c => c.Excercise).Include(c => c.Excercise.AssistantMuscle).Include(c => c.Excercise.TargetMuscle).Where(p => p.PlanId == id && p.Day == day).Include(c => c.MuscleGroup).ToListAsync();
+                if (userExser.Count != 0)
+                {
                     List<ExscercisePlanViewModel> excercises = new List<ExscercisePlanViewModel>();
-                    for(int i=0;i<userExser.Count;i++)
+                    for (int i = 0; i < userExser.Count; i++)
                     {
-                            ExscercisePlanViewModel excer = new ExscercisePlanViewModel();
-                            excer.setsNumber = userExser[i].SetsNumber;
-                            excer.Id = userExser[i].Excercise.Id;
-                            excer.Name = userExser[i].Excercise.Name;
-                            excer.TargetMuscleId = userExser[i].Excercise.TargetMuscleId;
-                            excer.AssistantMuscleId= userExser[i].Excercise.AssistantMuscleId;
-                            excer.Description = userExser[i].Excercise.Description;
-                            excer.TargetMuscle = userExser[i].Excercise.TargetMuscle;
-                            excer.AssistantMuscle = userExser[i].Excercise.AssistantMuscle;
-                            excer.Photo = userExser[i].Excercise.Photo;
-                            excercises.Add(excer);
+                        ExscercisePlanViewModel excercize = new ExscercisePlanViewModel();
+                        excercize.setsNumber = userExser[i].SetsNumber;
+                        excercize.Id = userExser[i].Excercise.Id;
+                        excercize.Name = userExser[i].Excercise.Name;
+                        excercize.TargetMuscleId = userExser[i].Excercise.TargetMuscleId;
+                        excercize.AssistantMuscleId = userExser[i].Excercise.AssistantMuscleId;
+                        excercize.Description = userExser[i].Excercise.Description;
+                        excercize.TargetMuscle = userExser[i].Excercise.TargetMuscle;
+                        excercize.AssistantMuscle = userExser[i].Excercise.AssistantMuscle;
+                        excercize.Photo = userExser[i].Excercise.Photo;
+                        excercises.Add(excercize);
                     }
-                    var userExserDays= await _context.ExcercisesInPlan.Where(p => p.PlanId == Id ).ToListAsync();
-                        for (int i=1;i<7;i++)
+                    var userExserDays = await _context.ExcercisesInPlan.Where(p => p.PlanId == id).ToListAsync();
+                    for (int i = 1; i < 7; i++)
+                    {
+                        var dayOfWeek = userExserDays.Find(x => x.Day == i);
+                        if (dayOfWeek != null)
                         {
-                            var day = userExserDays.Find(x => x.Day == i);
-                            if(day!=null)
-                            {
-                                days.Add(day.Day);
-                            }
+                            days.Add(dayOfWeek.Day);
                         }
-                    var trainingPlan = new TrainingPlanViewModel() { planId = userExser[0].PlanId, muscleGroupId = userExser[0].MuscleGroupId, excercises = excercises, muscleGroupName = userExser[0].MuscleGroup.Name, planDiscription = userExser[0].TrainingPlan.Discription,day=userExser[0].Day,activeDays=days};
-                        return Json(trainingPlan);
                     }
-                    return NoContent();
-                
+                    var trainingPlan = new TrainingPlanViewModel() { planId = userExser[0].PlanId, muscleGroupId = userExser[0].MuscleGroupId, excercises = excercises, muscleGroupName = userExser[0].MuscleGroup.Name, planDiscription = userExser[0].TrainingPlan.Discription, day = userExser[0].Day, activeDays = days };
+                    return Json(trainingPlan);
+                }
+                return NoContent();
+
             }
-            
+
             return NoContent();
 
-            
+
         }
 
         [HttpGet("getPreviousTraining/{id}/{MuscleGroupId}/{UserId}")]
-
-        public async Task<ActionResult<PreviousTrainViewModel>> GetPreviousTrainHistory(int Id,int MuscleGroupId,string UserId)
+        [AllowAnonymous]
+        public async Task<ActionResult<PreviousTrainViewModel>> GetPreviousTrainHistory(int id, int muscleGroupId, string userId)
         {
-            var plan = await _context.TrainingPlans.FindAsync(Id);
-           
-            var user = await userManager.FindByIdAsync(UserId);
+            var plan = await _context.TrainingPlans.FindAsync(id);
 
-                if (user == null)
-                    return Unauthorized();
-            var user_plans = await _context.PlansOfUsers.Where(x => x.UserId == user.Id).ToListAsync();
-            if (user_plans.Count==0)
-                return NoContent();
+            var user = await _userManager.FindByIdAsync(userId);
 
-            var trHis = await _context.TrainingHistories.Where(x => x.UserId == user.Id && x.PlanId == Id&&x.MuscleGroupId==MuscleGroupId).ToListAsync();
+            if (user == null)
+                return Unauthorized();
+            var trHis = await _context.TrainingHistories.Where(x => x.UserId == user.Id && x.PlanId == id && x.MuscleGroupId == muscleGroupId).ToListAsync();
             if (trHis.Count == 0)
             {
                 return NoContent();
             }
-            var History = trHis.OrderBy(p => p.EndTime).First();
-           
-           
-                List<TrainingHistory> trainingHistory = new List<TrainingHistory>();
-                trainingHistory = await _context.TrainingHistories.Where(p =>p.UserId==user.Id&&p.EndTime.DayOfYear==History.EndTime.DayOfYear&&p.MuscleGroupId==MuscleGroupId).Include(x=>x.Excercise).ToListAsync();
-          
-            
-                
-                
-            PreviousTrainViewModel trainingHistoryView = new PreviousTrainViewModel(Id, trainingHistory); 
+            var History = trHis.OrderBy(p => p.EndTime).Last();
+
+
+            List<TrainingHistory> trainingHistory = new List<TrainingHistory>();
+            trainingHistory = await _context.TrainingHistories.Where(p => p.UserId == user.Id && p.EndTime.DayOfYear == History.EndTime.DayOfYear && p.MuscleGroupId == muscleGroupId).Include(x => x.Excercise).OrderBy(x => x.Id).ToListAsync();
+
+
+
+
+            PreviousTrainViewModel trainingHistoryView = new PreviousTrainViewModel(id, trainingHistory);
 
 
             if (plan != null)
@@ -132,16 +126,15 @@ namespace FitnessWebApp.Controllers
         }
         [HttpGet("TrainingHistory/{UserId}")]
 
-        public async Task<ActionResult<ICollection<TrainingHistory>>> GetUserTrainingHistory(string UserId)
+        public async Task<ActionResult<ICollection<TrainingHistory>>> GetUserTrainingHistory(string userId)
         {
-            
-            var user = await userManager.FindByIdAsync(UserId);
-            
-         
-                if (user == null)
-                    return Unauthorized();
-            
-            var trainingHistory = await _context.TrainingHistories.Include(c=>c.Excercise).Include(x=>x.Excercise.AssistantMuscle).Include(x => x.Excercise.TargetMuscle).Include(x=>x.muscleGroup).Where(p => p.UserId == user.Id ).Select(x => new { x.Excercise, x.EndTime, x.Quantity, x.muscleGroup, x.TotalWeight,x.StartTime }).ToListAsync(); //.Select(x=>new {x.Excercise,x.EndTime,x.Quantity,x.muscleGroup,x.TotalWeight })
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+
+            if (user == null) return Unauthorized();
+
+            var trainingHistory = await _context.TrainingHistories.Include(c => c.Excercise).Include(x => x.Excercise.AssistantMuscle).Include(x => x.Excercise.TargetMuscle).Include(x => x.muscleGroup).Where(p => p.UserId == user.Id).Select(x => new { x.Excercise, x.EndTime, x.Quantity, x.muscleGroup, x.TotalWeight, x.StartTime }).ToListAsync(); //.Select(x=>new {x.Excercise,x.EndTime,x.Quantity,x.muscleGroup,x.TotalWeight })
             List<TrainingHistoryViewModel> trainingHistoryViews = new List<TrainingHistoryViewModel>();
             for (int i = 0; i < trainingHistory.Count; i++)
             {
@@ -149,17 +142,17 @@ namespace FitnessWebApp.Controllers
                 var Date = trainingHistory[i].EndTime;
                 while (trainingHistory[i].EndTime.DayOfYear == Date.DayOfYear)
                 {
-                    
-                    excercises.Add(new TrainingHistoryExscerciseViewModel() {exserciseId=trainingHistory[i].Excercise.Id,exserciseName=trainingHistory[i].Excercise.Name,quantity=trainingHistory[i].Quantity,weight=trainingHistory[i].TotalWeight,startTime=trainingHistory[i].StartTime,endTime=trainingHistory[i].EndTime });
+
+                    excercises.Add(new TrainingHistoryExscerciseViewModel() { exserciseId = trainingHistory[i].Excercise.Id, exserciseName = trainingHistory[i].Excercise.Name, quantity = trainingHistory[i].Quantity, weight = trainingHistory[i].TotalWeight, startTime = trainingHistory[i].StartTime, endTime = trainingHistory[i].EndTime });
                     i++;
-                    if(i>=trainingHistory.Count)
+                    if (i >= trainingHistory.Count)
                     {
                         break;
                     }
                 }
-                
-                trainingHistoryViews.Add( new TrainingHistoryViewModel() {date=Date,excercises=excercises });
-                if(i>=trainingHistory.Count)
+
+                trainingHistoryViews.Add(new TrainingHistoryViewModel() { date = Date, excercises = excercises });
+                if (i >= trainingHistory.Count)
                 {
                     break;
                 }
@@ -168,8 +161,8 @@ namespace FitnessWebApp.Controllers
             if (trainingHistoryViews != null)
             {
 
-                    return Json(trainingHistoryViews);
-                
+                return Json(trainingHistoryViews);
+
             }
 
             return NoContent();
