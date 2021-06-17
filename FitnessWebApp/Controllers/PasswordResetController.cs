@@ -29,7 +29,7 @@ namespace FitnessWebApp.Controllers
         [HttpPost]
         [Route("ForgotPassword")]
         [AllowAnonymous]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model,EmailService emailService)
         {
             if (ModelState.IsValid)
             {
@@ -41,7 +41,6 @@ namespace FitnessWebApp.Controllers
 
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var callbackUrl = Url.Action("ResetPassword", "PasswordReset", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
-                EmailService emailService = new EmailService(_configuration);
                 await emailService.SendEmailAsync(model.Email, "Reset Password", $"Для сброса пароля введите код: {code}");
                 return Ok("Mail with code was sent");
             }

@@ -16,13 +16,13 @@ namespace FitnessWebApp.Controllers
     public class EndTrainingController : Controller
     {
         private AppDbContext _context;
-        private readonly UserManager<User> userManager;
+        private readonly UserManager<User> _userManager;
 
-        public EndTrainingController(AppDbContext context, UserManager<User> userMgr)
+        public EndTrainingController(AppDbContext context, UserManager<User> userManager)
         {
 
             _context = context;
-            userManager = userMgr;
+            _userManager = userManager;
         }
 
         [HttpPost("trainingSubmit/{id}")]
@@ -31,7 +31,7 @@ namespace FitnessWebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await userManager.FindByIdAsync(Id);
+                var user = await _userManager.FindByIdAsync(Id);
                 {
                     if (user == null)
                         return Unauthorized();

@@ -60,7 +60,7 @@ namespace FitnessWebApp
                 options.ExpireTimeSpan = TimeSpan.FromHours(24);
 
             });
-
+            services.AddSingleton<EmailService>();
             services.AddControllersWithViews();
 
         }

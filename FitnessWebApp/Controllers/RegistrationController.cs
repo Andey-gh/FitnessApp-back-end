@@ -32,7 +32,7 @@ namespace FitnessWebApp.Controllers
 
         [Route("reg")]
         [HttpPost]
-        public async Task<IActionResult> Register(RegistrationViewModel model)
+        public async Task<IActionResult> Register(RegistrationViewModel model, EmailService emailService)
         {
             if (ModelState.IsValid)
             {
@@ -49,7 +49,7 @@ namespace FitnessWebApp.Controllers
                         "api",
                         new { userId = user.Id, code = token },
                         protocol: HttpContext.Request.Scheme);
-                    EmailService emailService = new EmailService(_configuration);
+                    
                     await emailService.SendEmailAsync(model.Email, "Confirm your account",
                         $"Подтвердите регистрацию, перейдя по ссылке: <a href='{callbackUrl}'>Confirm E-mail</a>");
                     return Content("Для завершения регистрации проверьте электронную почту и перейдите по ссылке, указанной в письме");

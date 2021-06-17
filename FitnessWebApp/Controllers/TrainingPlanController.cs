@@ -18,7 +18,6 @@ namespace FitnessWebApp.Controllers
     [ApiController]
     public class TrainingPlanController:Controller
     {
-        //private  TrainingPlanManager _trainingPlanManager;
         private  AppDbContext _context;
         private readonly UserManager<User> _userManager;
         public TrainingPlanController(AppDbContext context, UserManager<User> userManager)
