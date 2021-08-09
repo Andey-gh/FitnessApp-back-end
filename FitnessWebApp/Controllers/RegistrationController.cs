@@ -9,6 +9,7 @@ using FitnessWebApp.Models;
 using FitnessWebApp.Services;
 using FitnessWebApp.Domain;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace FitnessWebApp.Controllers
 {
@@ -31,17 +32,18 @@ namespace FitnessWebApp.Controllers
         }
 
         [Route("reg")]
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Register(RegistrationViewModel model)
         {
             if (ModelState.IsValid)
             {
                 User user = new User { UserName = model.UserLogin,Name = model.Name,Email = model.Email,IsMetrics=false };
-                // добавляем пользователя
+                
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    // установка куки
+                    
                     var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
                     var callbackUrl = Url.Action(

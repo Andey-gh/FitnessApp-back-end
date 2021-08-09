@@ -19,20 +19,8 @@ namespace FitnessWebApp.Models
         public string Email { get; set; }
         public bool isMetrics { get; set; }
         public int ActivePlanId { get; set; }
+        public string AccesToken { get; set; }
 
-        public UserViewModel(string Id, int Age, string Name,int Weight,int Height,string Gender,string Email,bool IsMetrics,int activePlanId)
-        {
-            
-            this.Id = Id;
-            this.Name = Name;
-            this.Age = Age;
-            this.Weight = Weight;
-            this.Height = Height;
-            this.Gender = Gender;
-            this.Email = Email;
-            this.isMetrics = IsMetrics;
-            this.ActivePlanId = activePlanId;
-            
-        }
+        
     }
 }

@@ -17,11 +17,13 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using FitnessWebApp.Domain;
 using FitnessWebApp.Managers;
+using Microsoft.Extensions.Configuration;
+using AuthenticationPlugin;
 
 namespace FitnessWebApp.Controllers
 {
     [Route("/api")]
-    
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
 
     public class AccountController:Controller
@@ -30,59 +32,78 @@ namespace FitnessWebApp.Controllers
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> signInManager;
         private readonly AppDbContext _context;
+        private IConfiguration _configuration;
+        private readonly AuthService _auth;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signinMgr, AppDbContext context)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signinMgr, AppDbContext context, IConfiguration configuration)
         {
             _userManager = userManager;
             signInManager = signinMgr;
             _context = context;
-           
+            _configuration = configuration;
+            _auth = new AuthService(_configuration);
+
         }
-        [AllowAnonymous]
+        /*[AllowAnonymous]
         public IActionResult Login(string returnUrl)
         {
             ViewBag.returnUrl = returnUrl;
             return View(new LoginViewModel());
-        }
+        }*/
 
 
         [HttpGet]
-        [Route("UserMetrics/{id}")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetMetrics(string id)
+        [Route("UserMetrics")]
+        
+        public async Task<IActionResult> GetMetrics()
         {
             
-            var user = await _userManager.FindByIdAsync(id);
-            if (user != null)
+            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+            
+            if(UserId!=null)
             {
-                var user_health = _context.HealthProblems.Where(x => x.UserId == id).ToList();
-                List<string> health_problems = new List<string>();
-                if (user_health != null)
+                var user =await _userManager.FindByIdAsync(UserId);
+                if(user!=null)
                 {
-                    
-                    for (int i = 0; i < user_health.Count; i++)
+                    var user_health = _context.HealthProblems.Where(x => x.UserId == user.Id).ToList();
+                    List<string> health_problems = new List<string>();
+                    if (user_health != null)
                     {
-                        health_problems.Add(user_health[i].Problem);
+
+                        for (int i = 0; i < user_health.Count; i++)
+                        {
+                            health_problems.Add(user_health[i].Problem);
+                        }
                     }
+                    var user_metrics = new UserProfileViewModel() { MetricAge = user.Age, MetricGoal = user.Goal, HealthProblems = health_problems, MetricHeight = user.Height, MetricPullUps = user.MaxPullUps, MetricPushUps = user.MaxPushUps, MetricWeight = user.Weight, Name = user.Name, MetricGender = user.Gender };
+
+                    return Json(user_metrics);
                 }
-                var user_metrics = new UserProfileViewModel() { MetricAge = user.Age, MetricGoal = user.Goal, HealthProblems = health_problems, MetricHeight = user.Height, MetricPullUps = user.MaxPullUps, MetricPushUps = user.MaxPushUps, MetricWeight = user.Weight, Name = user.Name ,MetricGender=user.Gender};
-              
-                return Json(user_metrics);
+                return Unauthorized();
+                
             }
-            return Unauthorized();
+            else
+            {
+                return Unauthorized();
+            }
+            
+            
         }
-        [HttpPatch]
-        [Route("UserMetrics/{id}")]
-        [AllowAnonymous]
-        public async Task<IActionResult> UpdateMetrics(string id,UserMetricsUpdateModel UserMetrics)
+        [HttpPut]
+        [Route("UserMetrics")]
+        
+        public async Task<IActionResult> UpdateMetrics(UserMetricsUpdateModel UserMetrics)
         {
             if (ModelState.IsValid)
             {
-                var user = await _userManager.FindByIdAsync(id);
-                if (user != null)
-                {
+                var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+                
+                if (UserId != null)
+                {   var user = await _userManager.FindByIdAsync(UserId);
+                    if(user!=null)
+                    { 
                     user.Name = UserMetrics.Name;
-                    WeightHistory history = new WeightHistory(id,UserMetrics.MetricWeight,DateTime.Now.Date);
+                    WeightHistory history = new WeightHistory(user.Id,UserMetrics.MetricWeight,DateTime.Now.Date);
                     WeightHistoryManager manager = new WeightHistoryManager(_context, _userManager);
                     await manager.AddChange(history);
                     user.Age = UserMetrics.MetricAge;
@@ -91,17 +112,19 @@ namespace FitnessWebApp.Controllers
                     user.Height = UserMetrics.MetricHeight;
                     for(int i=0;i<UserMetrics.healthProblems.Count;i++)
                     {
-                        UserMetrics.healthProblems[i].UserId = id;
+                        UserMetrics.healthProblems[i].UserId = user.Id;
                     }
                     await _userManager.UpdateAsync(user);
                     await _context.SaveChangesAsync();
-                    var user_health = _context.HealthProblems.Where(x => x.UserId == id).ToList();
+                    var user_health = _context.HealthProblems.Where(x => x.UserId == user.Id).ToList();
                     _context.HealthProblems.RemoveRange(user_health);
                     await _context.SaveChangesAsync();
-                   await _context.HealthProblems.AddRangeAsync(UserMetrics.healthProblems);
+                    await _context.HealthProblems.AddRangeAsync(UserMetrics.healthProblems);
                     await _context.SaveChangesAsync();
 
                     return Ok();
+                    }
+                    return Unauthorized();
                 }
                 return Unauthorized();
             }
@@ -111,7 +134,7 @@ namespace FitnessWebApp.Controllers
         [HttpPost]
         [Route("login")]
         [AllowAnonymous]
-        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl)
+        public async Task<IActionResult> Login([FromForm]LoginViewModel model, string returnUrl)
         {
             
             if (ModelState.IsValid)
@@ -119,38 +142,64 @@ namespace FitnessWebApp.Controllers
                 User user = await _userManager.FindByNameAsync(model.UserLogin);
                 if (user != null)
                 {
-                    await signInManager.SignOutAsync();
-                    Microsoft.AspNetCore.Identity.SignInResult result = await signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, true);
-                    if (result.Succeeded)
+                    
+                    var result =_userManager.CheckPasswordAsync(user, model.Password);
+                    
+                    if (result.Result)
                     {
-                        UserViewModel user_model = new UserViewModel(user.Id,user.Age,user.Name,user.Weight,user.Height,user.Gender,user.Email,user.IsMetrics,user.ActivePlanId);
                         
 
-                        return Json(user_model);
+                        var claims = new[]
+                        {
+                           new Claim("Email", user.Email),
+                           new Claim("Id", user.Id),
+                        };
+                        var token = _auth.GenerateAccessToken(claims);
+                        UserViewModel user_model = new UserViewModel()
+                         {
+                             Id = user.Id,
+                             Name=user.Name,
+                             Age=user.Age,
+                             Weight=user.Weight,
+                             Height=user.Height,
+                             Gender=user.Gender,
+                             Email=user.Email,
+                             isMetrics=user.IsMetrics,
+                             ActivePlanId=user.ActivePlanId,
+                             AccesToken=token.AccessToken
+
+                         };
+                         return Json(user_model);
                         
+
+
                     }
                 }
                 return Unauthorized();
-                //ModelState.AddModelError(nameof(LoginViewModel.UserName), "Неверный логин или пароль");
+                
             }
             return UnprocessableEntity();
         }
 
         [HttpPost]
-        [AllowAnonymous] //временно,для теста,убрать
-        [Route("sendMetrics/{id}")]
-        public async Task<IActionResult> PostMetrics(MetricsModel model,string id)
+        [Route("sendMetrics")]
+        public async Task<IActionResult> PostMetrics(MetricsModel model)
         {
             if (ModelState.IsValid)
             {
-                var user = await _userManager.FindByIdAsync(id);
+                var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+                if (UserId == null) 
+                { 
+                    return Unauthorized(); 
+                }
+                var user = await _userManager.FindByIdAsync(UserId);
                 
                 if (user != null)
                 {
                    
                     user.Age = model.MetricAge;
                     user.Height = model.MetricHeight;
-                    WeightHistory history = new WeightHistory(id, model.MetricWeight, DateTime.Now.Date);
+                    WeightHistory history = new WeightHistory(user.Id, model.MetricWeight, DateTime.Now.Date);
                     WeightHistoryManager manager = new WeightHistoryManager(_context, _userManager);
                     await manager.AddChange(history);
                     user.Goal = model.MetricGoal;
@@ -176,10 +225,15 @@ namespace FitnessWebApp.Controllers
             return UnprocessableEntity();
         }
         [HttpPost]
-        [AllowAnonymous] 
-        [Route("ChangeUserActivePlan/{PlanId}/{UserId}")]
-        public async Task<IActionResult> ChangeActivePlan(int planId, string UserId)
+        
+        [Route("ChangeUserActivePlan/{PlanId}")]
+        public async Task<IActionResult> ChangeActivePlan(int planId)
         {
+            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+            if (UserId == null) 
+            { 
+                return Unauthorized(); 
+            }
             var user = await _userManager.FindByIdAsync(UserId);
             if(user==null)
             {
@@ -197,85 +251,33 @@ namespace FitnessWebApp.Controllers
 
                 
         }
-        [Route("Logout")]
+        [HttpGet]
+        [Route("refresh_token")]
         public async Task<IActionResult> Logout()
         {
-            await signInManager.SignOutAsync();
-           
-       
-            return RedirectToAction("api", "login");
+            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+            if (UserId == null)
+            {
+                return Unauthorized();
+            }
+            var user = await _userManager.FindByIdAsync(UserId);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+           // var token = HttpContext.Request.Headers.FirstOrDefault(x => x.Key == "Authorization").Value.ToString();
+           // token = token.Split(" ").Last();
+            var claims = new[]
+                        {
+                           new Claim("Email", user.Email),
+                           new Claim("Id", user.Id),
+                        };
+            var token = _auth.GenerateAccessToken(claims);
+
+            return Ok(token);
            
         }
 
-
-        #region AuthTest
-        /* private async Task Authenticate(string userName)
-         {
-             // создаем один claim
-             var claims = new List<Claim>
-     {
-         new Claim(ClaimsIdentity.DefaultNameClaimType, userName)
-     };
-             // создаем объект ClaimsIdentity
-             ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
-             // установка аутентификационных куки
-             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
-         }*/
-        /* [HttpPost("Login")]
-         public IActionResult Token(LoginViewModel model)
-         {
-             var identity = GetIdentityAsync(model);
-             if (identity == null)
-             {
-                 return BadRequest(new { errorText = "Invalid username or password." });
-             }
-
-             var now = DateTime.UtcNow;
-             // создаем JWT-токен
-             var jwt = new JwtSecurityToken(
-                     issuer: AuthOptions.ISSUER,
-                     audience: AuthOptions.AUDIENCE,
-                     notBefore: now,
-                     claims: HttpContext.User.Claims,
-                     expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
-                     signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
-             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-
-             var response = new
-             {
-                 access_token = encodedJwt,
-                 username = identity.Id
-             };
-
-             return Json(response);
-         }
-
-         private async Task<ClaimsIdentity> GetIdentityAsync(string username, string password)
-         {
-             User user = await userManager.FindByNameAsync(model.UserLogin);
-
-             if (user != null)
-             {
-                 await signInManager.SignOutAsync();
-                 Microsoft.AspNetCore.Identity.SignInResult result = await signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, true);
-                 if(result.Succeeded)
-                 { 
-                 var claims = new List<Claim>
-                 {
-                     new Claim(ClaimsIdentity.DefaultNameClaimType, user.UserName),
-                     new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Name)
-                 };
-                 ClaimsIdentity claimsIdentity =
-                 new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
-                     ClaimsIdentity.DefaultRoleClaimType);
-                 return claimsIdentity;
-                 }
-             }
-
-             // если пользователя не найдено
-             return null;
-         }*/
-        #endregion
 
     }
 }

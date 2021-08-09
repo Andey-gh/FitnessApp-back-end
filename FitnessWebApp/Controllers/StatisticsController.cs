@@ -1,6 +1,7 @@
 ﻿using FitnessWebApp.Domain;
 using FitnessWebApp.Managers;
 using FitnessWebApp.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +13,7 @@ using System.Threading.Tasks;
 namespace FitnessWebApp.Controllers
 {
     [Route("/api")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     public class StatisticsController : Controller
     {
@@ -23,13 +25,22 @@ namespace FitnessWebApp.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
         [Route("Tonnage")]
         public async Task<IActionResult> GetTonnage(Statistics stats)
         {
             if (!ModelState.IsValid)
             {
                 return UnprocessableEntity();
+            }
+            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+            if (UserId == null)
+            {
+                return Unauthorized();
+            }
+            var user = await _userManager.FindByIdAsync(UserId);
+            if (user == null)
+            {
+                return Unauthorized();
             }
             string[] labels = new string[stats.Period];
             float[] tonnages = new float[stats.Period];
@@ -58,12 +69,21 @@ namespace FitnessWebApp.Controllers
         }
 
         [HttpPost]
-        [AllowAnonymous]
         [Route("Weight")]
         public async Task<IActionResult> WeightChange(WeightHistory history){
             if (!ModelState.IsValid)
             {
                 return UnprocessableEntity();
+            }
+            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+            if (UserId == null)
+            {
+                return Unauthorized();
+            }
+            var user = await _userManager.FindByIdAsync(UserId);
+            if (user == null)
+            {
+                return Unauthorized();
             }
             history.Date = DateTime.Now.Date;
            WeightHistoryManager manager  = new WeightHistoryManager(_context,_userManager);

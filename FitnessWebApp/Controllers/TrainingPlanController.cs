@@ -10,11 +10,13 @@ using FitnessWebApp.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace FitnessWebApp.Controllers
 {
-    [Authorize]
+    
     [Route("/api")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     public class TrainingPlanController:Controller
     {

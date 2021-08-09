@@ -11,10 +11,9 @@ using Microsoft.OpenApi.Models;
 using FitnessWebApp.Models;
 using System;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using FitnessWebApp.Services;
-using System.Linq;
-using Microsoft.AspNetCore.Http;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace FitnessWebApp
 {
@@ -32,7 +31,7 @@ namespace FitnessWebApp
             // This method gets called by the runtime. Use this method to add services to the container.
             public void ConfigureServices(IServiceCollection services){
             services.AddDistributedMemoryCache();
-            services.AddSession();
+            //services.AddSession();
             services.AddDbContext<AppDbContext>(options => options.UseMySql(Configuration.GetConnectionString("Release")));
             
             //настраиваем identity систему
@@ -47,19 +46,24 @@ namespace FitnessWebApp
                 opts.Password.RequireDigit = true;
                 opts.Tokens.PasswordResetTokenProvider = ResetPasswordTokenProvider.ProviderKey;
             }).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders().AddTokenProvider<ResetPasswordTokenProvider>(ResetPasswordTokenProvider.ProviderKey);
-            services.ConfigureApplicationCookie(options =>
-            {
-                options.Cookie.Name = "fitnessWebApp";
-                options.Cookie.HttpOnly = false;
-                options.LoginPath = "/api/login";
-                options.AccessDeniedPath = "/";
-                options.LogoutPath = "/api/Logout";
-                options.SlidingExpiration = true;
-                options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
-                options.ExpireTimeSpan= TimeSpan.FromHours(24);
 
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = Configuration["Tokens:Issuer"],
+                    ValidAudience = Configuration["Tokens:Issuer"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Tokens:Key"])),
+                    ClockSkew = TimeSpan.Zero,
+                    
+                };
             });
-           
+
             services.AddControllersWithViews();
           
         }
@@ -67,7 +71,7 @@ namespace FitnessWebApp
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseSession();
+            //app.UseSession();
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseStaticFiles();
@@ -78,7 +82,7 @@ namespace FitnessWebApp
                .SetIsOriginAllowed(origin => true) // allow any origin
                .AllowCredentials()); // allow credentials
            
-            app.UseCookiePolicy();
+            
             app.UseAuthentication();
             app.UseAuthorization();
 

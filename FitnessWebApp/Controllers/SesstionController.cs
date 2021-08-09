@@ -10,30 +10,41 @@ using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace FitnessWebApp.Controllers
 {
     
     [Route("/api")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     public class SesstionController:Controller
     {
         private AppDbContext _context;
-        private readonly UserManager<User> userManager;
+        private readonly UserManager<User> _userManager;
 
         public SesstionController(AppDbContext context, UserManager<User> userMgr)
         {
 
             _context = context;
-            userManager = userMgr;
+            _userManager = userMgr;
         }
 
-        [HttpGet("getPlan/{id}/{day}/{UserId}")]
+        [HttpGet("getPlan/{id}/{day}")]
         
-        public async Task<ActionResult<ICollection<ExcerciseInPlan>>> GetPreSsestion(int Id,int Day,string UserId)
+        public async Task<ActionResult<ICollection<ExcerciseInPlan>>> GetPreSsestion(int Id,int Day)
         {
+            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+            if (UserId == null)
+            {
+                return Unauthorized();
+            }
+            var user = await _userManager.FindByIdAsync(UserId);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
             var plan = await _context.TrainingPlans.FindAsync(Id);
-            var user = await userManager.FindByIdAsync(UserId);
             var days = new List<int>();
            
            
@@ -59,6 +70,7 @@ namespace FitnessWebApp.Controllers
                             excer.Description = userExser[i].Excercise.Description;
                             excer.TargetMuscle = userExser[i].Excercise.TargetMuscle;
                             excer.AssistantMuscle = userExser[i].Excercise.AssistantMuscle;
+                        excer.Photo = userExser[i].Excercise.Photo;
                             excercises.Add(excer);
                     }
                     var userExserDays= await _context.ExcercisesInPlan.Where(p => p.PlanId == Id ).ToListAsync();
@@ -82,30 +94,36 @@ namespace FitnessWebApp.Controllers
             
         }
 
-        [HttpGet("getPreviousTraining/{id}/{MuscleGroupId}/{UserId}")]
+        [HttpGet("getPreviousTraining/{id}/{MuscleGroupId}")]
 
-        public async Task<ActionResult<PreviousTrainViewModel>> GetPreviousTrainHistory(int Id,int MuscleGroupId,string UserId)
+        public async Task<ActionResult<PreviousTrainViewModel>> GetPreviousTrainHistory(int Id,int MuscleGroupId)
         {
+            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+            if (UserId == null)
+            {
+                return Unauthorized();
+            }
+            var user = await _userManager.FindByIdAsync(UserId);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
             var plan = await _context.TrainingPlans.FindAsync(Id);
-           
-            var user = await userManager.FindByIdAsync(UserId);
 
-                if (user == null)
-                    return Unauthorized();
-            var user_plans = await _context.PlansOfUsers.Where(x => x.UserId == user.Id).ToListAsync();
-            if (user_plans.Count==0)
-                return NoContent();
+           // var user_plans = await _context.PlansOfUsers.Where(x => x.UserId == user.Id).ToListAsync();
+          //  if (user_plans.Count==0)
+            //    return NoContent();
 
             var trHis = await _context.TrainingHistories.Where(x => x.UserId == user.Id && x.PlanId == Id&&x.MuscleGroupId==MuscleGroupId).ToListAsync();
             if (trHis.Count == 0)
             {
                 return NoContent();
             }
-            var History = trHis.OrderBy(p => p.EndTime).First();
+            var History = trHis.OrderBy(p => p.EndTime).Last();
            
            
-                List<TrainingHistory> trainingHistory = new List<TrainingHistory>();
-                trainingHistory = await _context.TrainingHistories.Where(p =>p.UserId==user.Id&&p.EndTime.DayOfYear==History.EndTime.DayOfYear&&p.MuscleGroupId==MuscleGroupId).Include(x=>x.Excercise).ToListAsync();
+           List<TrainingHistory> trainingHistory = new List<TrainingHistory>();
+        trainingHistory = await _context.TrainingHistories.Where(p =>p.UserId==user.Id&&p.EndTime.DayOfYear==History.EndTime.DayOfYear&&p.MuscleGroupId==MuscleGroupId).Include(x=>x.Excercise).OrderBy(x=>x.Id).ToListAsync();
           
             
                 
@@ -129,17 +147,21 @@ namespace FitnessWebApp.Controllers
 
 
         }
-        [HttpGet("TrainingHistory/{UserId}")]
+        [HttpGet("TrainingHistory")]
 
-        public async Task<ActionResult<ICollection<TrainingHistory>>> GetUserTrainingHistory(string UserId)
+        public async Task<ActionResult<ICollection<TrainingHistory>>> GetUserTrainingHistory()
         {
-            
-            var user = await userManager.FindByIdAsync(UserId);
-            
-         
-                if (user == null)
-                    return Unauthorized();
-            
+            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+            if (UserId == null)
+            {
+                return Unauthorized();
+            }
+            var user = await _userManager.FindByIdAsync(UserId);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+
             var trainingHistory = await _context.TrainingHistories.Include(c=>c.Excercise).Include(x=>x.Excercise.AssistantMuscle).Include(x => x.Excercise.TargetMuscle).Include(x=>x.muscleGroup).Where(p => p.UserId == user.Id ).Select(x => new { x.Excercise, x.EndTime, x.Quantity, x.muscleGroup, x.TotalWeight,x.StartTime }).ToListAsync(); //.Select(x=>new {x.Excercise,x.EndTime,x.Quantity,x.muscleGroup,x.TotalWeight })
             List<TrainingHistoryViewModel> trainingHistoryViews = new List<TrainingHistoryViewModel>();
             for (int i = 0; i < trainingHistory.Count; i++)

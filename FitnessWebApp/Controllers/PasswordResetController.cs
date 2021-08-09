@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using FitnessWebApp.Services;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace FitnessWebApp.Controllers
 {
