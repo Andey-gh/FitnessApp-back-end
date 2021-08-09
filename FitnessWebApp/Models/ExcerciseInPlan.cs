@@ -10,10 +10,7 @@ namespace FitnessWebApp.Models
     public class ExcerciseInPlan
     {
         [Key]
-        public int Id { get; set; }
-        [Required]
-        [Display(Name = "Количество подходов в упражнении")]
-        public int SetsNumber { get; set; }
+        public int Id { get; set; } 
 
         [Required]
         [Display(Name = "Id Плана тренировок")]
@@ -21,15 +18,15 @@ namespace FitnessWebApp.Models
         [ForeignKey(nameof(TrainingPlan))]
         public int? PlanId { get; set; }
         
-        public TrainingPlan TrainingPlan { get; set; }
+        public TrainingPlan TrainingPlan { get; set; } 
+        
         [Required]
         [Display(Name = "Id Упражнения")]
         [ForeignKey(nameof(Excercise))]
         public int? ExcerciseId { get; set; }
 
+        public Excercise Excercise { get; set; } 
         
-        public Excercise Excercise { get; set; }
-
         [Required]
         [Display(Name = "День упражнения")]
         public int Day { get; set; }
@@ -39,6 +36,10 @@ namespace FitnessWebApp.Models
         [ForeignKey(nameof(MuscleGroup))]
         public int MuscleGroupId { get; set; }
         public MuscleGroup MuscleGroup { get; set; }
+        
+        [Required]
+        [Display(Name = "Количество подходов в упражнении")]
+        public int SetsNumber { get; set; }
 
         
     }

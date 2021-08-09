@@ -8,19 +8,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+
 namespace FitnessWebApp.Controllers
 {
-    [Authorize]
+    
     [Route("/api")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     public class ExcerciseController : Controller
     {
         
         private AppDbContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public ExcerciseController(AppDbContext context)
+        public ExcerciseController(AppDbContext context,UserManager<User> userManager)
         {
-
+            _userManager = userManager;
             _context = context;
         }
 
@@ -30,6 +35,16 @@ namespace FitnessWebApp.Controllers
         {
             if (ModelState.IsValid)
             {
+                var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+                if (UserId == null)
+                {
+                    return Unauthorized();
+                }
+                var user = await _userManager.FindByIdAsync(UserId);
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
                 await _context.AddAsync(excercise);
                 await _context.SaveChangesAsync();
                 return Json(excercise);
@@ -42,6 +57,16 @@ namespace FitnessWebApp.Controllers
         [Route("Excercises")]
         public async Task<ActionResult<ICollection<Excercise>>> GetExcercises()
         {
+            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+            if (UserId == null)
+            {
+                return Unauthorized();
+            }
+            var user = await _userManager.FindByIdAsync(UserId);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
 
             return await _context.Excercises.ToListAsync();
         }
@@ -51,6 +76,16 @@ namespace FitnessWebApp.Controllers
         {
             if (ModelState.IsValid)
             {
+                var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+                if (UserId == null)
+                {
+                    return Unauthorized();
+                }
+                var user = await _userManager.FindByIdAsync(UserId);
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
                 var excercise_id = await _context.Excercises.FindAsync(id);
 
                 if (excercise_id == null)
@@ -70,6 +105,16 @@ namespace FitnessWebApp.Controllers
         {
             if (ModelState.IsValid)
             {
+                var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+                if (UserId == null)
+                {
+                    return Unauthorized();
+                }
+                var user = await _userManager.FindByIdAsync(UserId);
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
                 var excercise = await _context.Excercises.FindAsync(id);
                 if (excercise == null)
                 {

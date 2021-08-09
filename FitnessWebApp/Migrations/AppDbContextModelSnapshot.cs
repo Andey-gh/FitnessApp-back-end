@@ -23,6 +23,9 @@ namespace FitnessWebApp.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<int?>("AssistantMuscleId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Description")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
@@ -34,7 +37,14 @@ namespace FitnessWebApp.Migrations
                     b.Property<string>("Photo")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
+                    b.Property<int?>("TargetMuscleId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("AssistantMuscleId");
+
+                    b.HasIndex("TargetMuscleId");
 
                     b.ToTable("Excercises");
                 });
@@ -71,6 +81,45 @@ namespace FitnessWebApp.Migrations
                     b.HasIndex("PlanId");
 
                     b.ToTable("ExcercisesInPlan");
+                });
+
+            modelBuilder.Entity("FitnessWebApp.Models.HealthProblem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Problem")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("HealthProblems");
+                });
+
+            modelBuilder.Entity("FitnessWebApp.Models.Muscle", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
+
+                    b.Property<string>("Photo")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Muscles");
                 });
 
             modelBuilder.Entity("FitnessWebApp.Models.MuscleGroup", b =>
@@ -164,6 +213,9 @@ namespace FitnessWebApp.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<string>("Category")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
                     b.Property<int>("Difficulty")
                         .HasColumnType("int");
 
@@ -198,6 +250,9 @@ namespace FitnessWebApp.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<int>("ActivePlanId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Age")
                         .HasColumnType("int");
 
@@ -216,14 +271,27 @@ namespace FitnessWebApp.Migrations
                         .HasMaxLength(6)
                         .HasColumnType("varchar(6) CHARACTER SET utf8mb4");
 
+                    b.Property<string>("Goal")
+                        .HasMaxLength(40)
+                        .HasColumnType("varchar(40) CHARACTER SET utf8mb4");
+
                     b.Property<int>("Height")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsMetrics")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<int>("MaxPullUps")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MaxPushUps")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .HasMaxLength(50)
@@ -261,6 +329,8 @@ namespace FitnessWebApp.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ActivePlanId");
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -269,6 +339,29 @@ namespace FitnessWebApp.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers");
+                });
+
+            modelBuilder.Entity("FitnessWebApp.Models.WeightHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
+
+                    b.Property<int>("Weight")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("WeightHistories");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -399,6 +492,21 @@ namespace FitnessWebApp.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("FitnessWebApp.Models.Excercise", b =>
+                {
+                    b.HasOne("FitnessWebApp.Models.Muscle", "AssistantMuscle")
+                        .WithMany()
+                        .HasForeignKey("AssistantMuscleId");
+
+                    b.HasOne("FitnessWebApp.Models.Muscle", "TargetMuscle")
+                        .WithMany()
+                        .HasForeignKey("TargetMuscleId");
+
+                    b.Navigation("AssistantMuscle");
+
+                    b.Navigation("TargetMuscle");
+                });
+
             modelBuilder.Entity("FitnessWebApp.Models.ExcerciseInPlan", b =>
                 {
                     b.HasOne("FitnessWebApp.Models.Excercise", "Excercise")
@@ -424,6 +532,15 @@ namespace FitnessWebApp.Migrations
                     b.Navigation("MuscleGroup");
 
                     b.Navigation("TrainingPlan");
+                });
+
+            modelBuilder.Entity("FitnessWebApp.Models.HealthProblem", b =>
+                {
+                    b.HasOne("FitnessWebApp.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("FitnessWebApp.Models.PlansOfUser", b =>
@@ -476,6 +593,28 @@ namespace FitnessWebApp.Migrations
                     b.Navigation("muscleGroup");
 
                     b.Navigation("TrainingPlan");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FitnessWebApp.Models.User", b =>
+                {
+                    b.HasOne("FitnessWebApp.Models.TrainingPlan", "TrainingPlan")
+                        .WithMany()
+                        .HasForeignKey("ActivePlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TrainingPlan");
+                });
+
+            modelBuilder.Entity("FitnessWebApp.Models.WeightHistory", b =>
+                {
+                    b.HasOne("FitnessWebApp.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
