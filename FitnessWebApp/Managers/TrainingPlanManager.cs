@@ -2,8 +2,10 @@
 using FitnessWebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,12 +14,24 @@ namespace FitnessWebApp.Managers
     public class TrainingPlanManager
     {
         private readonly AppDbContext _context;
-        public TrainingPlanManager(AppDbContext context)
+        private readonly IConfiguration _configuration;
+        public TrainingPlanManager(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
         public async Task<ActionResult<TrainingPlan>> AddPlan(TrainingPlan plan)
         {
+            string extension = Path.GetExtension(plan.Image.FileName);
+            if (extension.ToLower() != ".jpg" && extension.ToLower() != ".png") return new StatusCodeResult(400);
+            var guid = Guid.NewGuid();
+            var filePath = Path.Combine("wwwroot", "Images", guid + ".jpg");
+            if (plan.Image != null)
+            {
+                var fileStream = new FileStream(filePath, FileMode.Create);
+                plan.Image.CopyTo(fileStream);
+            }
+            plan.Photo = $"{ _configuration.GetValue<string>("Domain")}" + filePath.Remove(0, 7);
             await _context.AddAsync(plan);
             await _context.SaveChangesAsync();
             return new OkResult();

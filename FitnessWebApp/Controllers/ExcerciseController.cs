@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using FitnessWebApp.Managers;
+using Microsoft.Extensions.Configuration;
 
 namespace FitnessWebApp.Controllers
 {
@@ -23,17 +24,18 @@ namespace FitnessWebApp.Controllers
         private AppDbContext _context;
         private readonly UserManager<User> _userManager;
         private readonly ExcercisesManager _excerciseManager;
+        
 
-        public ExcerciseController(AppDbContext context,UserManager<User> userManager)
+        public ExcerciseController(AppDbContext context,UserManager<User> userManager, IConfiguration configuration)
         {
             _userManager = userManager;
             _context = context;
-            _excerciseManager = new ExcercisesManager(context);
+            _excerciseManager = new ExcercisesManager(context,configuration);
         }
 
         [HttpPost]
         [Route("Excercises")]
-        public async Task<ActionResult> Post(Excercise excercise)
+        public async Task<ActionResult> Post([FromForm]Excercise excercise)
         {
             if (!ModelState.IsValid)
             {
@@ -50,8 +52,8 @@ namespace FitnessWebApp.Controllers
             {
                 return Unauthorized();
             }
-            _excerciseManager.AddExcercise(excercise);
-            return Ok();
+            
+            return await _excerciseManager.AddExcercise(excercise);
 
         }
 

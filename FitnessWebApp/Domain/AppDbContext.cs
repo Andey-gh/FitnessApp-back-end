@@ -21,7 +21,6 @@ namespace FitnessWebApp.Domain
         public DbSet<ExcerciseInPlan> ExcercisesInPlan { get; set; }
         public DbSet<MuscleGroup> MuscleGroups { get; set; }
         public DbSet<PlansOfUser> PlansOfUsers { get; set; }
-
         public DbSet<HealthProblem> HealthProblems { get; set; }
         public DbSet<Muscle> Muscles { get; set; }
         public DbSet<WeightHistory> WeightHistories { get;set;}

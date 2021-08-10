@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -31,7 +32,9 @@ namespace FitnessWebApp.Models
         [Display(Name = "Рейтинг")]
         public int Rating { get; set; }
 
-        [Display(Name = "Ссылка на фото плана")]
+        [NotMapped]
+        public IFormFile Image { get; set; }
+
         public string Photo { get; set; }
         
         [Display(Name = "Категория")]

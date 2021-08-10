@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Graph;
 using System;
@@ -34,6 +35,11 @@ namespace FitnessWebApp.Models
         public int ActivePlanId { get; set; }
         [ForeignKey(nameof(ActivePlanId))]
         public TrainingPlan TrainingPlan { get; set; }
+
+        [NotMapped]
+        public IFormFile Image { get; set; }
+
+        
 
     }
 }

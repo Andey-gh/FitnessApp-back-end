@@ -12,29 +12,30 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using FitnessWebApp.Managers;
+using Microsoft.Extensions.Configuration;
 
 namespace FitnessWebApp.Controllers
 {
-    
+
     [Route("/api")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
-    public class TrainingPlanController:Controller
+    public class TrainingPlanController : Controller
     {
         //private  TrainingPlanManager _trainingPlanManager;
-        private  readonly AppDbContext _context;
+        private readonly AppDbContext _context;
         private readonly UserManager<User> _userManager;
         private readonly TrainingPlanManager _trainingPlanManager;
-        public TrainingPlanController(AppDbContext context, UserManager<User> userManager)
+        public TrainingPlanController(AppDbContext context, UserManager<User> userManager, IConfiguration configuration)
         {
-            _trainingPlanManager = new TrainingPlanManager(context);
+            _trainingPlanManager = new TrainingPlanManager(context,configuration);
             _context = context;
             _userManager = userManager;
         }
 
         [HttpPost]
         [Route("TrainingPlans")]
-        public async Task<ActionResult<TrainingPlan>> Post(TrainingPlan plan)
+        public async Task<ActionResult<TrainingPlan>> Post([FromForm] TrainingPlan plan)
         {
             if (!ModelState.IsValid) 
             {

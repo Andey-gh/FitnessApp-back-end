@@ -29,7 +29,9 @@ namespace FitnessWebApp.Models
         [ForeignKey(nameof(AssistantMuscleId))]
         public virtual Muscle AssistantMuscle { get; set; } 
 
-        [Display(Name = "Фото упражнения")]
+   
+        [NotMapped]
+        public IFormFile Image { get; set; }
 
         public string Photo { get; set; }
 

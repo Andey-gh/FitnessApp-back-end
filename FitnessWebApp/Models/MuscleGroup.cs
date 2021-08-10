@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,7 +17,10 @@ namespace FitnessWebApp.Models
         [Display(Name = "Название группы мышц")]
         [MaxLength(50)]
         public string Name { get; set; }
-        [Display(Name = "Фото группы мышц")]
+
+        [NotMapped]
+        public IFormFile Image { get; set; }
+
         public string Photo { get; set; }
     }
 }
