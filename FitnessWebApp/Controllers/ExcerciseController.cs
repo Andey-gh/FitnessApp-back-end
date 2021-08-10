@@ -4,12 +4,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-//using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using FitnessWebApp.Managers;
 
 namespace FitnessWebApp.Controllers
 {
@@ -22,34 +22,36 @@ namespace FitnessWebApp.Controllers
         
         private AppDbContext _context;
         private readonly UserManager<User> _userManager;
+        private readonly ExcercisesManager _excerciseManager;
 
         public ExcerciseController(AppDbContext context,UserManager<User> userManager)
         {
             _userManager = userManager;
             _context = context;
+            _excerciseManager = new ExcercisesManager(context);
         }
 
         [HttpPost]
         [Route("Excercises")]
-        public async Task<ActionResult<Excercise>> Post(Excercise excercise)
+        public async Task<ActionResult> Post(Excercise excercise)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-                if (UserId == null)
-                {
-                    return Unauthorized();
-                }
-                var user = await _userManager.FindByIdAsync(UserId);
-                if (user == null)
-                {
-                    return Unauthorized();
-                }
-                await _context.AddAsync(excercise);
-                await _context.SaveChangesAsync();
-                return Json(excercise);
+                return UnprocessableEntity();
             }
-            return UnprocessableEntity();
+
+            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+            if (UserId == null)
+            {
+                return Unauthorized();
+            }
+            var user = await _userManager.FindByIdAsync(UserId);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+            _excerciseManager.AddExcercise(excercise);
+            return Ok();
 
         }
 
@@ -68,8 +70,10 @@ namespace FitnessWebApp.Controllers
                 return Unauthorized();
             }
 
-            return await _context.Excercises.ToListAsync();
+            return await _excerciseManager.GetExcercises();
         }
+
+
         [HttpGet("Excercises/{id}")]
 
         public async Task<ActionResult<Excercise>> GetExcercise(int id)
@@ -105,29 +109,28 @@ namespace FitnessWebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-                if (UserId == null)
-                {
-                    return Unauthorized();
-                }
-                var user = await _userManager.FindByIdAsync(UserId);
-                if (user == null)
-                {
-                    return Unauthorized();
-                }
-                var excercise = await _context.Excercises.FindAsync(id);
-                if (excercise == null)
-                {
-                    return NotFound();
-                }
+                return UnprocessableEntity();
+            }
+            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+            if (UserId == null)
+            {
+                return Unauthorized();
+            }
+            var user = await _userManager.FindByIdAsync(UserId);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+            var excercise = await _context.Excercises.FindAsync(id);
+            if (excercise == null)
+            {
+                return NotFound();
+            }
 
-                _context.Excercises.Remove(excercise);
-                await _context.SaveChangesAsync();
+            _excerciseManager.DeleteExcercise(excercise);
 
                 return Ok("Excercise was deleted");
-            }
-            return UnprocessableEntity();
-
+  
         }
     }
 }

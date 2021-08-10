@@ -32,21 +32,23 @@ namespace FitnessWebApp.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var user = await _userManager.FindByEmailAsync(model.Email);
-                if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
-                {
-                    return Ok("Mail with code was sent");
-                }
-
-                var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var callbackUrl = Url.Action("ResetPassword", "PasswordReset", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
-                EmailService emailService = new EmailService(_configuration);
-                await emailService.SendEmailAsync(model.Email, "Reset Password",$"Для сброса пароля введите код: {code}");
+                return UnprocessableEntity();
+            }
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+            {
                 return Ok("Mail with code was sent");
             }
-            return UnprocessableEntity();
+
+            var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var callbackUrl = Url.Action("ResetPassword", "PasswordReset", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
+            EmailService emailService = new EmailService(_configuration);
+            await emailService.SendEmailAsync(model.Email, "Reset Password",$"Для сброса пароля введите код: {code}");
+            return Ok("Mail with code was sent");
+            
+            
         }
 
 

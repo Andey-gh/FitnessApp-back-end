@@ -34,6 +34,7 @@ namespace FitnessWebApp.Controllers
         private readonly AppDbContext _context;
         private IConfiguration _configuration;
         private readonly AuthService _auth;
+        private readonly UserMetricsManager _userMetricsManager;
 
         public AccountController(UserManager<User> userManager, SignInManager<User> signinMgr, AppDbContext context, IConfiguration configuration)
         {
@@ -42,6 +43,7 @@ namespace FitnessWebApp.Controllers
             _context = context;
             _configuration = configuration;
             _auth = new AuthService(_configuration);
+            _userMetricsManager = new UserMetricsManager(context,userManager);
 
         }
         /*[AllowAnonymous]
@@ -59,76 +61,44 @@ namespace FitnessWebApp.Controllers
         {
             
             var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-            
-            if(UserId!=null)
-            {
-                var user =await _userManager.FindByIdAsync(UserId);
-                if(user!=null)
-                {
-                    var user_health = _context.HealthProblems.Where(x => x.UserId == user.Id).ToList();
-                    List<string> health_problems = new List<string>();
-                    if (user_health != null)
-                    {
-
-                        for (int i = 0; i < user_health.Count; i++)
-                        {
-                            health_problems.Add(user_health[i].Problem);
-                        }
-                    }
-                    var user_metrics = new UserProfileViewModel() { MetricAge = user.Age, MetricGoal = user.Goal, HealthProblems = health_problems, MetricHeight = user.Height, MetricPullUps = user.MaxPullUps, MetricPushUps = user.MaxPushUps, MetricWeight = user.Weight, Name = user.Name, MetricGender = user.Gender };
-
-                    return Json(user_metrics);
-                }
-                return Unauthorized();
-                
+            if (UserId == null) 
+            { 
+                return Unauthorized(); 
             }
-            else
+
+            var user =await _userManager.FindByIdAsync(UserId);
+            if(user==null)
             {
                 return Unauthorized();
             }
-            
-            
+
+            return Json(_userMetricsManager.GetUserMetrics(user));
+       
         }
         [HttpPut]
         [Route("UserMetrics")]
         
         public async Task<IActionResult> UpdateMetrics(UserMetricsUpdateModel UserMetrics)
         {
-            if (ModelState.IsValid)
-            {
-                var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-                
-                if (UserId != null)
-                {   var user = await _userManager.FindByIdAsync(UserId);
-                    if(user!=null)
-                    { 
-                    user.Name = UserMetrics.Name;
-                    WeightHistory history = new WeightHistory(user.Id,UserMetrics.MetricWeight,DateTime.Now.Date);
-                    WeightHistoryManager manager = new WeightHistoryManager(_context, _userManager);
-                    await manager.AddChange(history);
-                    user.Age = UserMetrics.MetricAge;
-                    user.Gender = UserMetrics.MetricGender;
-                    user.Goal = UserMetrics.MetricGoal;
-                    user.Height = UserMetrics.MetricHeight;
-                    for(int i=0;i<UserMetrics.healthProblems.Count;i++)
-                    {
-                        UserMetrics.healthProblems[i].UserId = user.Id;
-                    }
-                    await _userManager.UpdateAsync(user);
-                    await _context.SaveChangesAsync();
-                    var user_health = _context.HealthProblems.Where(x => x.UserId == user.Id).ToList();
-                    _context.HealthProblems.RemoveRange(user_health);
-                    await _context.SaveChangesAsync();
-                    await _context.HealthProblems.AddRangeAsync(UserMetrics.healthProblems);
-                    await _context.SaveChangesAsync();
+                if (!ModelState.IsValid)
+                {
+                    return UnprocessableEntity();
+                }
 
-                    return Ok();
-                    }
+                var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+                if(UserId==null)
+                {
                     return Unauthorized();
                 }
-                return Unauthorized();
-            }
-            return UnprocessableEntity();
+                var user = await _userManager.FindByIdAsync(UserId);
+                if(user==null)
+                {
+                    return Unauthorized();
+                }
+
+                _userMetricsManager.UpdateUserMetrics(user, UserMetrics);
+                return Ok();
+            
         }
 
         [HttpPost]
@@ -185,44 +155,24 @@ namespace FitnessWebApp.Controllers
         [Route("sendMetrics")]
         public async Task<IActionResult> PostMetrics(MetricsModel model)
         {
-            if (ModelState.IsValid)
-            {
-                var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-                if (UserId == null) 
-                { 
-                    return Unauthorized(); 
-                }
-                var user = await _userManager.FindByIdAsync(UserId);
-                
-                if (user != null)
-                {
-                   
-                    user.Age = model.MetricAge;
-                    user.Height = model.MetricHeight;
-                    WeightHistory history = new WeightHistory(user.Id, model.MetricWeight, DateTime.Now.Date);
-                    WeightHistoryManager manager = new WeightHistoryManager(_context, _userManager);
-                    await manager.AddChange(history);
-                    user.Goal = model.MetricGoal;
-                    user.MaxPushUps = model.MetricPushUps;
-                    user.MaxPullUps = model.MetricPullUps;
-                    user.IsMetrics = true;
-                    
+             if (!ModelState.IsValid)
+             {
+                return UnprocessableEntity();
+             }
 
-                   for(int i=0;i<model.MetricHealth.Count;i++)
-                    {
-                        HealthProblem problem = new HealthProblem(user.Id, model.MetricHealth[i].Problem);
-                       
-                        await _context.HealthProblems.AddAsync(problem);
-                        await _context.SaveChangesAsync();
-                    }
-                    
-
-                    await _userManager.UpdateAsync(user);
-                    return Ok();
-                }
+             var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+             if (UserId == null) 
+             { 
+                return Unauthorized(); 
+             }
+             var user = await _userManager.FindByIdAsync(UserId);
+             if(user==null)
+             {
                 return Unauthorized();
-            }
-            return UnprocessableEntity();
+             }
+            _userMetricsManager.PostUserMetrics(user, model);
+            return Ok();
+
         }
         [HttpPost]
         

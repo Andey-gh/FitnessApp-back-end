@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using FitnessWebApp.Managers;
 
 namespace FitnessWebApp.Controllers
 {
@@ -21,11 +22,12 @@ namespace FitnessWebApp.Controllers
     public class TrainingPlanController:Controller
     {
         //private  TrainingPlanManager _trainingPlanManager;
-        private  AppDbContext _context;
+        private  readonly AppDbContext _context;
         private readonly UserManager<User> _userManager;
+        private readonly TrainingPlanManager _trainingPlanManager;
         public TrainingPlanController(AppDbContext context, UserManager<User> userManager)
         {
-         
+            _trainingPlanManager = new TrainingPlanManager(context);
             _context = context;
             _userManager = userManager;
         }
@@ -34,118 +36,102 @@ namespace FitnessWebApp.Controllers
         [Route("TrainingPlans")]
         public async Task<ActionResult<TrainingPlan>> Post(TrainingPlan plan)
         {
-            if (ModelState.IsValid) {
-                await _context.AddAsync(plan);
-            await _context.SaveChangesAsync();
-            return Json(plan); 
+            if (!ModelState.IsValid) 
+            {
+                return UnprocessableEntity();
             }
-            return UnprocessableEntity();
-               
-        }
-
-        [HttpGet]
-        [AllowAnonymous]
-        [Route("GetPlanById/{id}/{UserId}")]
-        public async Task<ActionResult<ICollection<TrainingPlan>>> GetPlans(int id,string UserId)
-        {
-            var user = await _userManager.FindByIdAsync(UserId);
-            if(user==null)
+            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+            if (UserId == null)
             {
                 return Unauthorized();
             }
-            var plan = _context.TrainingPlans.Where(x => x.Id == id).FirstOrDefault();
-            if(plan==null)
+            var user = await _userManager.FindByIdAsync(UserId);
+            if (user == null)
             {
-                return NoContent();
+                return Unauthorized();
             }
-            //var exscercises =await  _context.ExcercisesInPlan.Where(x => x.PlanId == id).Include(x => x.Excercise).Include(x => x.Excercise.AssistantMuscle).Include(x => x.Excercise.TargetMuscle).ToListAsync();
-            List<List<ExscercisePlanViewModel>> trainings = new List<List<ExscercisePlanViewModel>>();
-            for(int i=1;i<8;i++)
-            {
-                List<ExscercisePlanViewModel> exscercisePlanViews = new List<ExscercisePlanViewModel>();
-                var exscer = await _context.ExcercisesInPlan.Where(x => x.PlanId == id&&x.Day==i).Include(x => x.Excercise).Include(x => x.Excercise.AssistantMuscle).Include(x => x.Excercise.TargetMuscle).ToListAsync();
 
-                foreach (var a in exscer)
-                {
-                    ExscercisePlanViewModel exscercisePlanViewModel = new ExscercisePlanViewModel() { Id = a.Id, Name = a.Excercise.Name, Description = a.Excercise.Description, setsNumber = a.SetsNumber, TargetMuscle = a.Excercise.TargetMuscle, TargetMuscleId = a.Excercise.TargetMuscleId, AssistantMuscle = a.Excercise.AssistantMuscle, AssistantMuscleId = a.Excercise.AssistantMuscleId };
-                    exscercisePlanViews.Add(exscercisePlanViewModel);
-                }
+            return await _trainingPlanManager.AddPlan(plan); 
 
-                trainings.Add(exscercisePlanViews);
-            }
-            TrainingPlanByCategoryViewModel trainingPlanByCategory = new TrainingPlanByCategoryViewModel() { planId=plan.Id,category=plan.Category,trainings=trainings,planDescription=plan.Discription,planName=plan.Name,photo=plan.Photo};
-            return Json(trainingPlanByCategory);
         }
+
         [HttpGet]
-        [AllowAnonymous]
+        [Route("GetPlanById/{id}")]
+        public async Task<ActionResult<ICollection<TrainingPlan>>> GetPlans(int id)
+        {
+           
+            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+            if (UserId == null)
+            {
+                return Unauthorized();
+            }
+            var user = await _userManager.FindByIdAsync(UserId);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+            return await _trainingPlanManager.GetPlanById(id);
+        }
+
+
+        [HttpGet]
         [Route("TrainingPlansByCategory/{category}")]
         public async Task<ActionResult<ICollection<TrainingPlan>>> GetPlansByCategory(string category)
         {
-            //List<TrainingPlanByCategoryViewModel> trainingPlanByCategory=new List<TrainingPlanByCategoryViewModel>();
-           // List<ExscercisePlanViewModel> excerciseInPlan;
-            var plans=await _context.TrainingPlans.Where(x => x.Category == category).ToListAsync();
-            if(plans.Count==0)
+            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+            if (UserId == null)
             {
-                return NoContent();
+                return Unauthorized();
             }
-            /*for(int i=0;i<plans.Count;i++)
+            var user = await _userManager.FindByIdAsync(UserId);
+            if (user == null)
             {
-                //excerciseInPlan = new List<ExscercisePlanViewModel>();
-               // var exscercises = await _context.ExcercisesInPlan.Include(x=>x.Excercise).Include(x => x.Excercise.AssistantMuscle).Include(x => x.Excercise.TargetMuscle).Where(x => x.PlanId == plans[i].Id).ToListAsync();
-                /*if(exscercises.Count==0)
-                {
-                    return NoContent();
-                }*/
-                /*foreach(var a in exscercises)
-                {
-                    ExscercisePlanViewModel exscercisePlanViewModel = new ExscercisePlanViewModel() { Id = a.Id, Name = a.Excercise.Name, Description = a.Excercise.Description, setsNumber = a.SetsNumber, TargetMuscle = a.Excercise.TargetMuscle, TargetMuscleId = a.Excercise.TargetMuscleId, AssistantMuscle = a.Excercise.AssistantMuscle, AssistantMuscleId = a.Excercise.AssistantMuscleId };
-                    excerciseInPlan.Add(exscercisePlanViewModel);
-                }*/
-                
-                
-                /*TrainingPlanByCategoryViewModel PlanByCategory = new TrainingPlanByCategoryViewModel() {planId=plans[i].Id,category=plans[i].Category};
-                trainingPlanByCategory.Add(PlanByCategory);
-            }*/
+                return Unauthorized();
+            }
             
-            return Json(plans);
+            return await _trainingPlanManager.GetPlansByCategory(category);
         }
-        [HttpGet("TrainingPlans/{id}")]
 
-        public async Task<ActionResult<TrainingPlan>> GetPlan(int id)
-        {
-            if (ModelState.IsValid) 
-            {
-                var plan_id = await _context.TrainingPlans.FindAsync(id);
-
-            if (plan_id == null)
-            {
-                return NotFound();
-            }
-
-            return Json(plan_id); 
-
-            }
-            return UnprocessableEntity();
-                
-        }
+       //[HttpGet("TrainingPlans/{id}")]
+       //
+       //public async Task<ActionResult<TrainingPlan>> GetPlan(int id)
+       //{
+       //    if (ModelState.IsValid) 
+       //    {
+       //        var plan_id = await _context.TrainingPlans.FindAsync(id);
+       //
+       //    if (plan_id == null)
+       //    {
+       //        return NotFound();
+       //    }
+       //
+       //    return Json(plan_id); 
+       //
+       //    }
+       //    return UnprocessableEntity();
+       //        
+       //}
 
         [HttpDelete("TrainingPlans/{id}")]
         public async Task<ActionResult<TrainingPlan>> DeletePlan(int id)
         {
-            if (ModelState.IsValid) { 
-                var plan = await _context.TrainingPlans.FindAsync(id);
-            if (plan == null)
+            if (!ModelState.IsValid)
             {
-                return NotFound();
+                return UnprocessableEntity();
+            }
+            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+            if (UserId == null)
+            {
+                return Unauthorized();
+            }
+            var user = await _userManager.FindByIdAsync(UserId);
+            if (user == null)
+            {
+                return Unauthorized();
             }
 
-            _context.TrainingPlans.Remove(plan);
-            await _context.SaveChangesAsync();
-
-            return Ok("Plan was deleted"); 
-            }
-            return UnprocessableEntity();
-               
+            return await _trainingPlanManager.DeletePlan(id);
+ 
         }
     }
 }
