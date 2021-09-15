@@ -1,6 +1,7 @@
 ﻿using FitnessWebApp.Domain;
 using FitnessWebApp.Managers;
 using FitnessWebApp.Models;
+using FitnessWebApp.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -13,18 +14,19 @@ using System.Threading.Tasks;
 namespace FitnessWebApp.Controllers
 {
     [Route("/api")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     public class StatisticsController : Controller
     {
         private AppDbContext _context;
         private UserManager<User> _userManager;
-        private readonly StatisticsManager _statisticsManager;
-        public StatisticsController(AppDbContext context, UserManager<User> userManager) 
+        private readonly IStatisticsManager _statisticsManager;
+        private readonly JWTservice _jwtService;
+        public StatisticsController(AppDbContext context, UserManager<User> userManager, IStatisticsManager statisticsManager, JWTservice jwtService)
         {
             _context = context;
             _userManager = userManager;
-            _statisticsManager = new StatisticsManager(context,userManager);
+            _statisticsManager = statisticsManager;
+            _jwtService = jwtService;
         }
 
         [HttpGet]
@@ -35,17 +37,12 @@ namespace FitnessWebApp.Controllers
             {
                 return UnprocessableEntity();
             }
-            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-            if (UserId == null)
-            {
-                return Unauthorized();
-            }
-            var user = await _userManager.FindByIdAsync(UserId);
+            var user = await _jwtService.CheckUser(Request.Cookies["JWT"]);
             if (user == null)
             {
                 return Unauthorized();
             }
-            
+
             return await _statisticsManager.GetTonnage(stats);
 
         }
@@ -58,17 +55,12 @@ namespace FitnessWebApp.Controllers
             {
                 return UnprocessableEntity();
             }
-            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-            if (UserId == null)
-            {
-                return Unauthorized();
-            }
-            var user = await _userManager.FindByIdAsync(UserId);
+            var user = await _jwtService.CheckUser(Request.Cookies["JWT"]);
             if (user == null)
             {
                 return Unauthorized();
             }
-            
+
             return await _statisticsManager.WeightChange(history);
         }
 

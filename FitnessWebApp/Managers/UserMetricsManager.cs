@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace FitnessWebApp.Managers
 {
-    public class UserMetricsManager
+    public class UserMetricsManager:IUserMetricsManager
     {
         private readonly AppDbContext _context;
         private readonly UserManager<User> _userManager;
@@ -81,6 +81,18 @@ namespace FitnessWebApp.Managers
 
 
             await _userManager.UpdateAsync(user);
+        }
+        public async Task<IActionResult> ChangeActivePlan(int planId,User user)
+        {
+            var plan = _context.TrainingPlans.Where(x => x.Id == planId).FirstOrDefault();
+            if (plan == null)
+            {
+                return new NoContentResult();
+            }
+            user.ActivePlanId = plan.Id;
+            await _userManager.UpdateAsync(user);
+            await _context.SaveChangesAsync();
+            return new OkResult();
         }
     }
 }

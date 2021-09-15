@@ -1,6 +1,7 @@
 ﻿using FitnessWebApp.Domain;
 using FitnessWebApp.Managers;
 using FitnessWebApp.Models;
+using FitnessWebApp.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -17,19 +18,20 @@ namespace FitnessWebApp.Controllers
 {
    
     [Route("/api")] 
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     public class EndTrainingController : Controller
     {
         private AppDbContext _context;
         private readonly UserManager<User> _userManager;
-        private readonly TrainingManager _trainingManager;
+        private readonly ITrainingManager _trainingManager;
+        private readonly JWTservice _jwtService;
 
-        public EndTrainingController(AppDbContext context, UserManager<User> userMgr)
+        public EndTrainingController(AppDbContext context, UserManager<User> userMgr, ITrainingManager trainingManager, JWTservice jwtService)
         {
             _context = context;
             _userManager = userMgr;
-            _trainingManager = new TrainingManager(context);
+            _trainingManager = trainingManager;
+            _jwtService = jwtService;
         }
 
         [HttpPost("trainingSubmit")]
@@ -40,12 +42,7 @@ namespace FitnessWebApp.Controllers
             {
                 return UnprocessableEntity();
             }
-            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-            if (UserId == null)
-            {
-                return Unauthorized();
-            }
-            var user = await _userManager.FindByIdAsync(UserId);
+            var user = await _jwtService.CheckUser(Request.Cookies["JWT"]);
             if (user == null)
             {
                 return Unauthorized();

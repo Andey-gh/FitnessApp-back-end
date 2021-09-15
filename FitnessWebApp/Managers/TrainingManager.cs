@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FitnessWebApp.Managers
 {
-    public class TrainingManager
+    public class TrainingManager:ITrainingManager
     {
         private readonly AppDbContext _context;
         public TrainingManager(AppDbContext context)

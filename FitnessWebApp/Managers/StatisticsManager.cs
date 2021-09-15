@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace FitnessWebApp.Managers
 {
-    public class StatisticsManager
+    public class StatisticsManager:IStatisticsManager
     {
         private readonly AppDbContext _context;
         private readonly UserManager<User> _userManager;

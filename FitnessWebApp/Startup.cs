@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using FitnessWebApp.Services;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using FitnessWebApp.Managers;
 
 namespace FitnessWebApp
 {
@@ -30,6 +31,7 @@ namespace FitnessWebApp
 
             // This method gets called by the runtime. Use this method to add services to the container.
             public void ConfigureServices(IServiceCollection services){
+            services.AddCors();
             services.AddDistributedMemoryCache();
             //services.AddSession();
             services.AddDbContext<AppDbContext>(options => options.UseMySql(Configuration.GetConnectionString("Release")));
@@ -65,7 +67,14 @@ namespace FitnessWebApp
             });
 
             services.AddControllersWithViews();
-          
+            services.AddScoped<JWTservice>();
+            services.AddScoped<IUserMetricsManager,UserMetricsManager>();
+            services.AddScoped<ITrainingManager,TrainingManager>();
+            services.AddScoped<IExcercisesManager,ExcercisesManager>();
+            services.AddScoped<ISessionManager,SessionManager>();
+            services.AddScoped<IStatisticsManager,StatisticsManager>();
+            services.AddScoped<ITrainingPlanManager,TrainingPlanManager>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -77,10 +86,14 @@ namespace FitnessWebApp
             app.UseStaticFiles();
 
             app.UseCors(x => x
+               .WithOrigins(new[] {"http://localhost:3000", "http://localhost:8080" })
                .AllowAnyMethod()
                .AllowAnyHeader()
-               .SetIsOriginAllowed(origin => true) // allow any origin
-               .AllowCredentials()); // allow credentials
+               //.SetIsOriginAllowed(origin => true) // allow any origin
+               .AllowCredentials()
+               
+               ) ; // allow credentials
+            
            
             
             app.UseAuthentication();

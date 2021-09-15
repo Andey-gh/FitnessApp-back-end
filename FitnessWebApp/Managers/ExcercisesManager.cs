@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace FitnessWebApp.Managers
 {
-    public class ExcercisesManager
+    public class ExcercisesManager:IExcercisesManager
     {
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
@@ -43,11 +43,31 @@ namespace FitnessWebApp.Managers
             return await _context.Excercises.ToListAsync();
         }
         
-        public async void DeleteExcercise(Excercise excercise)
+        public async Task<ActionResult> DeleteExcercise(int id)
         {
-            
+            var excercise = await _context.Excercises.FindAsync(id);
+            if (excercise == null)
+            {
+                return new NotFoundResult();
+            }
+
             _context.Excercises.Remove(excercise);
             await _context.SaveChangesAsync();
+            return new OkResult();
         }
+
+        public async Task<ActionResult<Excercise>> GetExcerciseById(int id)
+        {
+            var excercise_id = await _context.Excercises.FindAsync(id);
+
+            if (excercise_id == null)
+            {
+                return new NotFoundResult();
+            }
+
+            return new JsonResult(excercise_id);
+        }
+
+        
     }
 }

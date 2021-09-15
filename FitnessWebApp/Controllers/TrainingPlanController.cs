@@ -13,24 +13,27 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using FitnessWebApp.Managers;
 using Microsoft.Extensions.Configuration;
+using FitnessWebApp.Services;
 
 namespace FitnessWebApp.Controllers
 {
 
     [Route("/api")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     public class TrainingPlanController : Controller
     {
-        //private  TrainingPlanManager _trainingPlanManager;
+        
         private readonly AppDbContext _context;
         private readonly UserManager<User> _userManager;
-        private readonly TrainingPlanManager _trainingPlanManager;
-        public TrainingPlanController(AppDbContext context, UserManager<User> userManager, IConfiguration configuration)
+        private readonly ITrainingPlanManager _trainingPlanManager;
+        private readonly JWTservice _jwtService;
+        public TrainingPlanController(AppDbContext context, UserManager<User> userManager, IConfiguration configuration, JWTservice jwtService, TrainingPlanManager trainingPlanManager)
         {
-            _trainingPlanManager = new TrainingPlanManager(context,configuration);
+
             _context = context;
             _userManager = userManager;
+            _jwtService = jwtService;
+            _trainingPlanManager = trainingPlanManager;
         }
 
         [HttpPost]
@@ -41,12 +44,7 @@ namespace FitnessWebApp.Controllers
             {
                 return UnprocessableEntity();
             }
-            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-            if (UserId == null)
-            {
-                return Unauthorized();
-            }
-            var user = await _userManager.FindByIdAsync(UserId);
+            var user = await _jwtService.CheckUser(Request.Cookies["JWT"]);
             if (user == null)
             {
                 return Unauthorized();
@@ -60,13 +58,8 @@ namespace FitnessWebApp.Controllers
         [Route("GetPlanById/{id}")]
         public async Task<ActionResult<ICollection<TrainingPlan>>> GetPlans(int id)
         {
-           
-            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-            if (UserId == null)
-            {
-                return Unauthorized();
-            }
-            var user = await _userManager.FindByIdAsync(UserId);
+
+            var user = await _jwtService.CheckUser(Request.Cookies["JWT"]);
             if (user == null)
             {
                 return Unauthorized();
@@ -79,17 +72,12 @@ namespace FitnessWebApp.Controllers
         [Route("TrainingPlansByCategory/{category}")]
         public async Task<ActionResult<ICollection<TrainingPlan>>> GetPlansByCategory(string category)
         {
-            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-            if (UserId == null)
-            {
-                return Unauthorized();
-            }
-            var user = await _userManager.FindByIdAsync(UserId);
+            var user = await _jwtService.CheckUser(Request.Cookies["JWT"]);
             if (user == null)
             {
                 return Unauthorized();
             }
-            
+
             return await _trainingPlanManager.GetPlansByCategory(category);
         }
 
@@ -120,12 +108,7 @@ namespace FitnessWebApp.Controllers
             {
                 return UnprocessableEntity();
             }
-            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-            if (UserId == null)
-            {
-                return Unauthorized();
-            }
-            var user = await _userManager.FindByIdAsync(UserId);
+            var user = await _jwtService.CheckUser(Request.Cookies["JWT"]);
             if (user == null)
             {
                 return Unauthorized();

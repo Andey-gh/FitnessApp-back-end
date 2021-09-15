@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FitnessWebApp.Managers
 {
-    public class SessionManager
+    public class SessionManager:ISessionManager
     {
         private readonly AppDbContext _context;
 

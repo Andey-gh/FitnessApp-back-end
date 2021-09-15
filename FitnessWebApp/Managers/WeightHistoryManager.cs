@@ -9,10 +9,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FitnessWebApp.Managers
 {
-    public class WeightHistoryManager
+    public class WeightHistoryManager:IWeightHistoryManager
     {
-        private AppDbContext _context;
-        private UserManager<User> _userManager;
+        private readonly AppDbContext _context;
+        private readonly UserManager<User> _userManager;
         public WeightHistoryManager(AppDbContext context, UserManager<User> userManager)
         {
             _context = context;

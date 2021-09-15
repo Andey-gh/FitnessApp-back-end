@@ -12,36 +12,33 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using FitnessWebApp.Managers;
+using FitnessWebApp.Services;
 
 namespace FitnessWebApp.Controllers
 {
     
     [Route("/api")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     public class SesstionController:Controller
     {
         private AppDbContext _context;
         private readonly UserManager<User> _userManager;
-        private readonly SessionManager _sessionManager;
-
-        public SesstionController(AppDbContext context, UserManager<User> userMgr)
+        private readonly ISessionManager _sessionManager;
+        private readonly JWTservice _jwtService;
+        public SesstionController(AppDbContext context, UserManager<User> userMgr, ISessionManager sessionManager, JWTservice jwtService)
         {
-            _sessionManager = new SessionManager(context);
+
             _context = context;
             _userManager = userMgr;
+            _sessionManager = sessionManager;
+            _jwtService = jwtService;
         }
 
         [HttpGet("getPlan/{id}/{day}")]
         
         public async Task<ActionResult<ICollection<ExcerciseInPlan>>> GetPreSsestion(int Id,int Day)
         {
-            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-            if (UserId == null)
-            {
-                return Unauthorized();
-            }
-            var user = await _userManager.FindByIdAsync(UserId);
+            var user = await _jwtService.CheckUser(Request.Cookies["JWT"]);
             if (user == null)
             {
                 return Unauthorized();

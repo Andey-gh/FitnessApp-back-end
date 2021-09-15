@@ -11,26 +11,28 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using FitnessWebApp.Managers;
 using Microsoft.Extensions.Configuration;
+using FitnessWebApp.Services;
 
 namespace FitnessWebApp.Controllers
 {
     
     [Route("/api")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     public class ExcerciseController : Controller
     {
         
         private AppDbContext _context;
         private readonly UserManager<User> _userManager;
-        private readonly ExcercisesManager _excerciseManager;
-        
+        private readonly IExcercisesManager _excerciseManager;
+        private readonly JWTservice _jwtService;
 
-        public ExcerciseController(AppDbContext context,UserManager<User> userManager, IConfiguration configuration)
+
+        public ExcerciseController(AppDbContext context, UserManager<User> userManager, IConfiguration configuration, IExcercisesManager excerciseManager, JWTservice jwtService)
         {
             _userManager = userManager;
             _context = context;
-            _excerciseManager = new ExcercisesManager(context,configuration);
+            _excerciseManager = excerciseManager;
+            _jwtService = jwtService;
         }
 
         [HttpPost]
@@ -42,17 +44,12 @@ namespace FitnessWebApp.Controllers
                 return UnprocessableEntity();
             }
 
-            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-            if (UserId == null)
-            {
-                return Unauthorized();
-            }
-            var user = await _userManager.FindByIdAsync(UserId);
+            var user = await _jwtService.CheckUser(Request.Cookies["JWT"]);
             if (user == null)
             {
                 return Unauthorized();
             }
-            
+
             return await _excerciseManager.AddExcercise(excercise);
 
         }
@@ -61,12 +58,7 @@ namespace FitnessWebApp.Controllers
         [Route("Excercises")]
         public async Task<ActionResult<ICollection<Excercise>>> GetExcercises()
         {
-            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-            if (UserId == null)
-            {
-                return Unauthorized();
-            }
-            var user = await _userManager.FindByIdAsync(UserId);
+            var user = await _jwtService.CheckUser(Request.Cookies["JWT"]);
             if (user == null)
             {
                 return Unauthorized();
@@ -82,24 +74,12 @@ namespace FitnessWebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-                if (UserId == null)
-                {
-                    return Unauthorized();
-                }
-                var user = await _userManager.FindByIdAsync(UserId);
+                var user = await _jwtService.CheckUser(Request.Cookies["JWT"]);
                 if (user == null)
                 {
                     return Unauthorized();
                 }
-                var excercise_id = await _context.Excercises.FindAsync(id);
-
-                if (excercise_id == null)
-                {
-                    return NotFound();
-                }
-
-                return Json(excercise_id);
+                return await _excerciseManager.GetExcerciseById(id);
 
             }
             return UnprocessableEntity();
@@ -113,25 +93,13 @@ namespace FitnessWebApp.Controllers
             {
                 return UnprocessableEntity();
             }
-            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-            if (UserId == null)
-            {
-                return Unauthorized();
-            }
-            var user = await _userManager.FindByIdAsync(UserId);
+            var user = await _jwtService.CheckUser(Request.Cookies["JWT"]);
             if (user == null)
             {
                 return Unauthorized();
             }
-            var excercise = await _context.Excercises.FindAsync(id);
-            if (excercise == null)
-            {
-                return NotFound();
-            }
-
-            _excerciseManager.DeleteExcercise(excercise);
-
-                return Ok("Excercise was deleted");
+            
+            return await _excerciseManager.DeleteExcercise(id);
   
         }
     }

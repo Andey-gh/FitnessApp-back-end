@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace FitnessWebApp.Managers
 {
-    public class TrainingPlanManager
+    public class TrainingPlanManager:ITrainingPlanManager
     {
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;

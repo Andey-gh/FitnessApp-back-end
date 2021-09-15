@@ -23,27 +23,24 @@ using AuthenticationPlugin;
 namespace FitnessWebApp.Controllers
 {
     [Route("/api")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
 
     public class AccountController:Controller
     {
         
         private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> signInManager;
-        private readonly AppDbContext _context;
-        private IConfiguration _configuration;
+        private readonly IConfiguration _configuration;
         private readonly AuthService _auth;
-        private readonly UserMetricsManager _userMetricsManager;
+        private readonly IUserMetricsManager _userMetricsManager;
+        private readonly JWTservice _jwtService;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signinMgr, AppDbContext context, IConfiguration configuration)
+        public AccountController(UserManager<User> userManager, IConfiguration configuration, JWTservice jwtService, IUserMetricsManager userMetricsManager)
         {
             _userManager = userManager;
-            signInManager = signinMgr;
-            _context = context;
             _configuration = configuration;
             _auth = new AuthService(_configuration);
-            _userMetricsManager = new UserMetricsManager(context,userManager);
+            _userMetricsManager = userMetricsManager;
+            _jwtService = jwtService;
 
         }
         /*[AllowAnonymous]
@@ -59,44 +56,32 @@ namespace FitnessWebApp.Controllers
         
         public async Task<IActionResult> GetMetrics()
         {
-            
-            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-            if (UserId == null) 
-            { 
-                return Unauthorized(); 
-            }
-
-            var user =await _userManager.FindByIdAsync(UserId);
+            var user = await _jwtService.CheckUser(Request.Cookies["JWT"]);
             if(user==null)
             {
                 return Unauthorized();
             }
 
             return Json(_userMetricsManager.GetUserMetrics(user));
-       
+
         }
         [HttpPut]
         [Route("UserMetrics")]
         
         public async Task<IActionResult> UpdateMetrics(UserMetricsUpdateModel UserMetrics)
         {
-                if (!ModelState.IsValid)
-                {
-                    return UnprocessableEntity();
-                }
+            if (!ModelState.IsValid)
+            {
+                return UnprocessableEntity();
+            }
 
-                var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-                if(UserId==null)
-                {
-                    return Unauthorized();
-                }
-                var user = await _userManager.FindByIdAsync(UserId);
-                if(user==null)
-                {
-                    return Unauthorized();
-                }
+            var user = await _jwtService.CheckUser(Request.Cookies["JWT"]);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
 
-                _userMetricsManager.UpdateUserMetrics(user, UserMetrics);
+            _userMetricsManager.UpdateUserMetrics(user, UserMetrics);
                 return Ok();
             
         }
@@ -104,51 +89,56 @@ namespace FitnessWebApp.Controllers
         [HttpPost]
         [Route("login")]
         [AllowAnonymous]
-        public async Task<IActionResult> Login([FromForm]LoginViewModel model, string returnUrl)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
-            
-            if (ModelState.IsValid)
-            {
-                User user = await _userManager.FindByNameAsync(model.UserLogin);
-                if (user != null)
-                {
-                    
-                    var result =_userManager.CheckPasswordAsync(user, model.Password);
-                    
-                    if (result.Result)
-                    {
-                        
 
-                        var claims = new[]
-                        {
-                           new Claim("Email", user.Email),
-                           new Claim("Id", user.Id),
-                        };
-                        var token = _auth.GenerateAccessToken(claims);
-                        UserViewModel user_model = new UserViewModel()
-                         {
-                             Id = user.Id,
-                             Name=user.Name,
-                             Age=user.Age,
-                             Weight=user.Weight,
-                             Height=user.Height,
-                             Gender=user.Gender,
-                             Email=user.Email,
-                             isMetrics=user.IsMetrics,
-                             ActivePlanId=user.ActivePlanId,
-                             AccesToken=token.AccessToken
-
-                         };
-                         return Json(user_model);
-                        
-
-
-                    }
-                }
-                return Unauthorized();
-                
+            if (!ModelState.IsValid)
+            { 
+                return UnprocessableEntity(); 
             }
-            return UnprocessableEntity();
+                User user = await _userManager.FindByNameAsync(model.UserLogin);
+            if (user == null)
+            { 
+                return Unauthorized(); 
+            }
+            var result =_userManager.CheckPasswordAsync(user, model.Password);
+                    
+            if (result.Result)
+            {
+
+                var claims = new[]
+                {
+                   new Claim("Email", user.Email),
+                   new Claim("Id", user.Id),
+                };
+                var token = _auth.GenerateAccessToken(claims);
+                UserViewModel user_model = new UserViewModel()
+                 {
+                     Id = user.Id,
+                     Name=user.Name,
+                     Age=user.Age,
+                     Weight=user.Weight,
+                     Height=user.Height,
+                     Gender=user.Gender,
+                     Email=user.Email,
+                     isMetrics=user.IsMetrics,
+                     ActivePlanId=user.ActivePlanId,
+                     
+
+                 };
+                Response.Cookies.Append("JWT", token.AccessToken.ToString(), new CookieOptions {
+                    HttpOnly=true,
+                    SameSite=SameSiteMode.None,
+                    Secure=true
+                    
+                });
+                 return Json(user_model);
+
+            }
+            return Unauthorized();
+               
+                
+            
         }
 
         [HttpPost]
@@ -160,15 +150,10 @@ namespace FitnessWebApp.Controllers
                 return UnprocessableEntity();
              }
 
-             var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-             if (UserId == null) 
-             { 
-                return Unauthorized(); 
-             }
-             var user = await _userManager.FindByIdAsync(UserId);
-             if(user==null)
+             var user = await _jwtService.CheckUser(Request.Cookies["JWT"]);
+             if (user == null)
              {
-                return Unauthorized();
+                 return Unauthorized();
              }
             _userMetricsManager.PostUserMetrics(user, model);
             return Ok();
@@ -179,31 +164,24 @@ namespace FitnessWebApp.Controllers
         [Route("ChangeUserActivePlan/{PlanId}")]
         public async Task<IActionResult> ChangeActivePlan(int planId)
         {
-            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-            if (UserId == null) 
-            { 
-                return Unauthorized(); 
+            if(!ModelState.IsValid)
+             {
+                return UnprocessableEntity();
             }
-            var user = await _userManager.FindByIdAsync(UserId);
-            if(user==null)
+
+            var user = await _jwtService.CheckUser(Request.Cookies["JWT"]);
+            if (user == null)
             {
                 return Unauthorized();
             }
-            var plan = _context.TrainingPlans.Where(x => x.Id == planId).FirstOrDefault();
-            if(plan==null)
-            {
-                return NoContent();
-            }
-            user.ActivePlanId = plan.Id;
-            await _userManager.UpdateAsync(user);
-            await _context.SaveChangesAsync();
-            return Ok();
+            
+            return await _userMetricsManager.ChangeActivePlan(planId, user);
 
                 
         }
         [HttpGet]
         [Route("refresh_token")]
-        public async Task<IActionResult> Logout()
+        public async Task<IActionResult> RefreshToken()
         {
             var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
             if (UserId == null)
@@ -215,8 +193,6 @@ namespace FitnessWebApp.Controllers
             {
                 return Unauthorized();
             }
-           // var token = HttpContext.Request.Headers.FirstOrDefault(x => x.Key == "Authorization").Value.ToString();
-           // token = token.Split(" ").Last();
             var claims = new[]
                         {
                            new Claim("Email", user.Email),
@@ -226,6 +202,18 @@ namespace FitnessWebApp.Controllers
 
             return Ok(token);
            
+        }
+
+        [HttpGet]
+        [Route("Logout")]
+        public async Task<ActionResult> Logout ()
+        {
+            if (Request.Cookies["JWT"] != null)
+            {
+                Response.Cookies.Delete("JWT");
+                return Ok();
+            }
+            return Unauthorized();
         }
 
 
