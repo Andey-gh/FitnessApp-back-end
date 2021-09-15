@@ -9,71 +9,99 @@ using Microsoft.Extensions.Hosting;
 using FitnessWebApp.Domain;
 using Microsoft.OpenApi.Models;
 using FitnessWebApp.Models;
+using System;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using FitnessWebApp.Services;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using FitnessWebApp.Managers;
 
 namespace FitnessWebApp
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration ñonfiguration)
         {
-            Configuration = configuration;
+            Configuration = ñonfiguration;
         }
 
-        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get;}
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
-        {
-             services.AddDbContext<AppDbContext>(options =>
-             options.UseSqlServer("Server=DESKTOP-FHIPLI2;Database=fitnessapplication;Trusted_Connection=True;MultipleActiveResultSets=true;"));
-                                                        
-           // services.AddDbContext<AppDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("Default")));
+
+
+            // This method gets called by the runtime. Use this method to add services to the container.
+            public void ConfigureServices(IServiceCollection services){
+            services.AddCors();
+            services.AddDistributedMemoryCache();
+            //services.AddSession();
+            services.AddDbContext<AppDbContext>(options => options.UseMySql(Configuration.GetConnectionString("Release")));
+            
             //íàñòðàèâàåì identity ñèñòåìó
             services.AddIdentity<User, IdentityRole>(opts =>
             {
-                opts.User.RequireUniqueEmail = false;
-                opts.Password.RequiredLength = 2;
+                opts.User.RequireUniqueEmail = true;
+                opts.SignIn.RequireConfirmedEmail = true;
+                opts.Password.RequiredLength = 6;
                 opts.Password.RequireNonAlphanumeric = false;
-                opts.Password.RequireLowercase = false;
-                opts.Password.RequireUppercase = false;
-                opts.Password.RequireDigit = false;
-            }).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
-            services.ConfigureApplicationCookie(options =>
+                opts.Password.RequireLowercase = true;
+                opts.Password.RequireUppercase = true;
+                opts.Password.RequireDigit = true;
+                opts.Tokens.PasswordResetTokenProvider = ResetPasswordTokenProvider.ProviderKey;
+            }).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders().AddTokenProvider<ResetPasswordTokenProvider>(ResetPasswordTokenProvider.ProviderKey);
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
             {
-                options.Cookie.Name = "myCompanyAuth";
-                options.Cookie.HttpOnly = true;
-                options.LoginPath = "/account/login";
-                options.AccessDeniedPath = "/account/accessdenied";
-                options.SlidingExpiration = true;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = Configuration["Tokens:Issuer"],
+                    ValidAudience = Configuration["Tokens:Issuer"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Tokens:Key"])),
+                    ClockSkew = TimeSpan.Zero,
+                    
+                };
             });
+
             services.AddControllersWithViews();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "FitnessWebApp", Version = "v1" });
-            });
+            services.AddScoped<JWTservice>();
+            services.AddScoped<IUserMetricsManager,UserMetricsManager>();
+            services.AddScoped<ITrainingManager,TrainingManager>();
+            services.AddScoped<IExcercisesManager,ExcercisesManager>();
+            services.AddScoped<ISessionManager,SessionManager>();
+            services.AddScoped<IStatisticsManager,StatisticsManager>();
+            services.AddScoped<ITrainingPlanManager,TrainingPlanManager>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "FitnessWebApp v1"));
-            }
-
+            //app.UseSession();
             app.UseHttpsRedirection();
-
             app.UseRouting();
-            app.UseCookiePolicy();
-            app.UseAuthentication();
+            app.UseStaticFiles();
+
+            app.UseCors(x => x
+               .WithOrigins(new[] {"http://localhost:3000", "http://localhost:8080" })
+               .AllowAnyMethod()
+               .AllowAnyHeader()
+               //.SetIsOriginAllowed(origin => true) // allow any origin
+               .AllowCredentials()
+               
+               ) ; // allow credentials
             
+           
+            
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapControllerRoute("/", "{controller=Home}/{action=Index}");
             });
         }
     }

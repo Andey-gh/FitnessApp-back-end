@@ -20,19 +20,8 @@ namespace FitnessWebApp.Models
         [Required]
         [Display(Name = "Имя")]
         public string Name { get; set; }
+
         [Required]
-        [Display(Name = "Возраст")]
-        public string Age { get; set; }
-        [Required]
-        [Display(Name = "Вес")]
-        public int Weight { get; set; }
-        [Required]
-        [Display(Name = "Рост")]
-        public int Height { get; set; }
-        [Required]
-        [Display(Name = "Пол")]
-        public string Gender { get; set; }
-       
         [Display(Name = "Email")]
         public string Email { get; set; }
 
