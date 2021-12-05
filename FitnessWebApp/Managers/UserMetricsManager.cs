@@ -12,11 +12,11 @@ namespace FitnessWebApp.Managers
     public class UserMetricsManager:IUserMetricsManager
     {
         private readonly AppDbContext _context;
-        private readonly UserManager<User> _userManager;
-        public UserMetricsManager(AppDbContext context, UserManager<User> userManager)
+        //private readonly UserManager<User> _userManager;
+        public UserMetricsManager(AppDbContext context)
         {
             _context = context;
-            userManager = _userManager;
+            //userManager = _userManager;
         }
 
         public  UserProfileViewModel GetUserMetrics(User user)
@@ -35,7 +35,7 @@ namespace FitnessWebApp.Managers
 
             return user_metrics;
         }
-        public async void UpdateUserMetrics (User user, UserMetricsUpdateModel UserMetrics)
+        public async Task<IActionResult> UpdateUserMetrics (User user, UserMetricsUpdateModel UserMetrics, UserManager<User> _userManager)
         {
             user.Name = UserMetrics.Name;
             WeightHistory history = new WeightHistory(user.Id, UserMetrics.MetricWeight, DateTime.Now.Date);
@@ -56,9 +56,9 @@ namespace FitnessWebApp.Managers
             await _context.SaveChangesAsync();
             await _context.HealthProblems.AddRangeAsync(UserMetrics.healthProblems);
             await _context.SaveChangesAsync();
-            
+            return new OkResult();
         }
-        public async void PostUserMetrics(User user, MetricsModel model)
+        public async Task<IActionResult> PostUserMetrics(User user, MetricsModel model, UserManager<User> _userManager)
         {
             user.Age = model.MetricAge;
             user.Height = model.MetricHeight;
@@ -81,10 +81,11 @@ namespace FitnessWebApp.Managers
 
 
             await _userManager.UpdateAsync(user);
+            return new OkResult();
         }
-        public async Task<IActionResult> ChangeActivePlan(int planId,User user)
+        public async Task<IActionResult> ChangeActivePlan(int planId,User user,UserManager<User> _userManager)
         {
-            var plan = _context.TrainingPlans.Where(x => x.Id == planId).FirstOrDefault();
+            var plan = await Task.Run(()=> _context.TrainingPlans.Where(x => x.Id == planId).FirstOrDefault());
             if (plan == null)
             {
                 return new NoContentResult();

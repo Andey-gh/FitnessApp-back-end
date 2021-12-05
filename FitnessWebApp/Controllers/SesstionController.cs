@@ -38,6 +38,7 @@ namespace FitnessWebApp.Controllers
         
         public async Task<ActionResult<ICollection<ExcerciseInPlan>>> GetPreSsestion(int Id,int Day)
         {
+            
             var user = await _jwtService.CheckUser(Request.Cookies["JWT"]);
             if (user == null)
             {
@@ -50,7 +51,8 @@ namespace FitnessWebApp.Controllers
                var userExser= await _context.ExcercisesInPlan.Include(c => c.Excercise).Include(c => c.Excercise.AssistantMuscle).Include(c => c.Excercise.TargetMuscle).Where(p => p.PlanId == Id && p.Day == Day).Include(c => c.MuscleGroup).ToListAsync();
                if(userExser.Count!=0)
                { 
-                   return Json(_sessionManager.GetPlanByIdAndDay(Id,Day,userExser));
+                    
+                    return Json(await _sessionManager.GetPlanByIdAndDay(Id,Day,userExser));
                }
                 return NoContent();
             }
@@ -63,12 +65,17 @@ namespace FitnessWebApp.Controllers
 
         public async Task<ActionResult<PreviousTrainViewModel>> GetPreviousTrainHistory(int Id,int MuscleGroupId)
         {
-            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-            if (UserId == null)
-            {
-                return Unauthorized();
-            }
-            var user = await _userManager.FindByIdAsync(UserId);
+            //var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+            //if (UserId == null)
+            //{
+            //    return Unauthorized();
+            //}
+            //var user = await _userManager.FindByIdAsync(UserId);
+            //if (user == null)
+            //{
+            //    return Unauthorized();
+            //}
+            var user = await _jwtService.CheckUser(Request.Cookies["JWT"]);
             if (user == null)
             {
                 return Unauthorized();
@@ -81,17 +88,21 @@ namespace FitnessWebApp.Controllers
 
         public async Task<ActionResult<ICollection<TrainingHistory>>> GetUserTrainingHistory()
         {
-            var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
-            if (UserId == null)
-            {
-                return Unauthorized();
-            }
-            var user = await _userManager.FindByIdAsync(UserId);
+            //var UserId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value;
+            //if (UserId == null)
+            //{
+            //    return Unauthorized();
+            //}
+            //var user = await _userManager.FindByIdAsync(UserId);
+            //if (user == null)
+            //{
+            //    return Unauthorized();
+            //}
+            var user = await _jwtService.CheckUser(Request.Cookies["JWT"]);
             if (user == null)
             {
                 return Unauthorized();
             }
-
             return await _sessionManager.GetTrainingHistory(user);
 
         }

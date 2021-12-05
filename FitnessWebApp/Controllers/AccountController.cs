@@ -81,7 +81,7 @@ namespace FitnessWebApp.Controllers
                 return Unauthorized();
             }
 
-            _userMetricsManager.UpdateUserMetrics(user, UserMetrics);
+            _userMetricsManager.UpdateUserMetrics(user, UserMetrics,_userManager);
                 return Ok();
             
         }
@@ -155,7 +155,7 @@ namespace FitnessWebApp.Controllers
              {
                  return Unauthorized();
              }
-            _userMetricsManager.PostUserMetrics(user, model);
+            await _userMetricsManager.PostUserMetrics(user, model,_userManager);
             return Ok();
 
         }
@@ -175,7 +175,7 @@ namespace FitnessWebApp.Controllers
                 return Unauthorized();
             }
             
-            return await _userMetricsManager.ChangeActivePlan(planId, user);
+            return await _userMetricsManager.ChangeActivePlan(planId, user,_userManager);
 
                 
         }

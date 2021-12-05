@@ -108,5 +108,15 @@ namespace FitnessWebApp.Managers
 
             return new OkResult();
         }
+
+        public async Task<ActionResult<ICollection<TrainingPlan>>> GetAllPlans()
+        {
+            var plan = await _context.TrainingPlans.ToListAsync();
+            if (plan == null)
+            {
+                return new NotFoundResult();
+            }
+            return new JsonResult(plan);
+        }
     }
 }

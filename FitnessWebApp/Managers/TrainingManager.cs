@@ -1,5 +1,6 @@
 ﻿using FitnessWebApp.Domain;
 using FitnessWebApp.Models;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace FitnessWebApp.Managers
             _context = context;
         }
 
-        public async void SubmitTraining(User user,EndTrainingViewModel trainingSubmit)
+        public async Task<ActionResult> SubmitTraining(User user,EndTrainingViewModel trainingSubmit)
         {
             for (int i = 0; i < trainingSubmit.exercises.Count; i++)
             {
@@ -23,6 +24,7 @@ namespace FitnessWebApp.Managers
                 await _context.AddAsync(trainingHistory);
                 await _context.SaveChangesAsync();
             }
+            return new OkResult();
         }
     }
 }

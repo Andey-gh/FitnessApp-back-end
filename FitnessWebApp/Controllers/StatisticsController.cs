@@ -29,7 +29,7 @@ namespace FitnessWebApp.Controllers
             _jwtService = jwtService;
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("Tonnage")]
         public async Task<IActionResult> GetTonnage(Statistics stats)
         {
@@ -48,7 +48,7 @@ namespace FitnessWebApp.Controllers
         }
 
         [HttpPost]
-        [Route("Weight")]
+        [Route("GetWeight")]
         public async Task<IActionResult> WeightChange(WeightHistory history)
         {
             if (!ModelState.IsValid)

@@ -48,8 +48,8 @@ namespace FitnessWebApp.Controllers
                 return Unauthorized();
             }
 
-            _trainingManager.SubmitTraining(user, trainingSubmit);
-            return Ok();
+            
+            return await _trainingManager.SubmitTraining(user, trainingSubmit);;
 
         }
 

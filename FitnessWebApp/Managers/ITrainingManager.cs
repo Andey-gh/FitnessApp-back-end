@@ -1,4 +1,5 @@
 ﻿using FitnessWebApp.Models;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,6 @@ namespace FitnessWebApp.Managers
 {
     public interface ITrainingManager
     {
-        void SubmitTraining(User user, EndTrainingViewModel trainingSubmit);
+        Task<ActionResult> SubmitTraining(User user, EndTrainingViewModel trainingSubmit);
     }
 }

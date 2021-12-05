@@ -13,5 +13,6 @@ namespace FitnessWebApp.Managers
         Task<ActionResult<ICollection<TrainingPlan>>> GetPlanById(int id);
         Task<ActionResult<ICollection<TrainingPlan>>> GetPlansByCategory(string category);
         Task<ActionResult<TrainingPlan>> DeletePlan(int id);
+        Task<ActionResult<ICollection<TrainingPlan>>> GetAllPlans();
     }
 }

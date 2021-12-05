@@ -36,6 +36,7 @@ namespace FitnessWebApp.Managers
                 excer.Photo = userExser[i].Excercise.Photo;
                 excercises.Add(excer);
             }
+            
             var userExserDays = await _context.ExcercisesInPlan.Where(p => p.PlanId == Id).ToListAsync();
             for (int i = 1; i < 7; i++)
             {

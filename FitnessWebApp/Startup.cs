@@ -15,6 +15,8 @@ using FitnessWebApp.Services;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using FitnessWebApp.Managers;
+using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace FitnessWebApp
 {
@@ -86,7 +88,7 @@ namespace FitnessWebApp
             app.UseStaticFiles();
 
             app.UseCors(x => x
-               .WithOrigins(new[] {"http://localhost:3000", "http://localhost:8080" })
+               .WithOrigins(new[] {"http://localhost:3000", "http://localhost:8080", "http://fitness-app.germanywestcentral.cloudapp.azure.com" })
                .AllowAnyMethod()
                .AllowAnyHeader()
                //.SetIsOriginAllowed(origin => true) // allow any origin
